@@ -1,0 +1,128 @@
+﻿<Window x:Class="FeatherCAD.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:FeatherCAD"
+        xmlns:controls="clr-namespace:FeatherCAD.Controls"
+        xmlns:models="clr-namespace:FeatherCAD.Models"
+        Title="FeatherCAD" Height="800" Width="1200" Icon="/Images/plume.ico">
+    <Grid>
+        <DockPanel>
+            <!-- 1. BARRE DE MENU SUPÉRIEURE -->
+            <Menu DockPanel.Dock="Top" Background="#F0F0F0" Padding="2">
+                <MenuItem Header="_Fichier">
+                    <MenuItem Header="_Nouveau" Click="MenuNew_Click" InputGestureText="Ctrl+N"/>
+                    <MenuItem Header="_Ouvrir..." Click="MenuOpen_Click" InputGestureText="Ctrl+O"/>
+                    <MenuItem Header="_Enregistrer" Click="MenuSave_Click" InputGestureText="Ctrl+S"/>
+                    <Separator />
+                    <MenuItem Header="_Quitter" Click="MenuExit_Click" />
+                </MenuItem>
+
+                <MenuItem Header="_Édition">
+                    <MenuItem Header="_Annuler" InputGestureText="Ctrl+Z" />
+                    <MenuItem Header="_Rétablir" InputGestureText="Ctrl+Y" />
+                    <Separator />
+                    <MenuItem Header="_Grouper" InputGestureText="Ctrl+G" Click="MenuGroup_Click"/>
+                    <MenuItem Header="_Dégrouper" InputGestureText="Ctrl+U" Click="MenuUngroup_Click"/>
+                    <Separator />
+                    <MenuItem Header="_Tout sélectionner" InputGestureText="Ctrl+A" Click="MenuSelectAll_Click"/>
+                    <MenuItem Header="_Supprimer" Click="MenuDelete_Click" InputGestureText="Suppr" />
+                </MenuItem>
+                <MenuItem Header="_Tracé">
+                    <MenuItem Header="_Couleur" InputGestureText="Ctrl+1" Click="MenuColorPicker_Click"/>
+                    <MenuItem Header="_Motif" IsCheckable="True" />
+                    <MenuItem Header="_Poids" x:Name="MenuPoids">
+                        <MenuItem Header="Très fin (0.5)" Tag="0.5" Click="MenuWeight_Click" IsCheckable="True"/>
+                        <MenuItem Header="Normal (1.0)" Tag="1.0" Click="MenuWeight_Click" IsCheckable="True" IsChecked="True"/>
+                        <MenuItem Header="Épais (2.0)" Tag="2.0" Click="MenuWeight_Click" IsCheckable="True"/>
+                        <MenuItem Header="Très épais (4.0)" Tag="4.0" Click="MenuWeight_Click" IsCheckable="True"/>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="_Vue">
+                    <MenuItem Header="_Zoom Tout" Click="MenuZoomAll_Click" InputGestureText="Ctrl+0" />
+                    <MenuItem Header="_Grille" IsCheckable="True" Click="MenuGrid_Click" />
+                </MenuItem>
+            </Menu>
+
+            <!-- 2. BARRE D'INSTRUCTIONS  -->
+            <Border DockPanel.Dock="Top" Background="#FFFCFAE9" BorderBrush="#FBC02D" BorderThickness="1" Padding="5,2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="💡 Instruction : " FontWeight="Bold" Foreground="#856404"/>
+                    <TextBlock x:Name="TxtStatus" Text="Sélectionnez un outil pour commencer" Foreground="#856404"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Barre d'outils à gauche -->
+            <Border DockPanel.Dock="Left" Background="#E0E0E0" Width="40" BorderBrush="Gray" BorderThickness="0,0,2,0">
+                <StackPanel Grid.Column="0" Background="#F0F0F0">
+
+                    <!-- GROUPE SÉLECTION -->
+                    <controls:FlyoutButton MainIcon="/Images/select.png" MainTag="Select" ToolSelected="OnToolSelected"/>
+
+                    <!-- GROUPE LIGNE -->
+                    <controls:FlyoutButton MainIcon="/Images/line.png" MainTag="Line" ToolSelected="OnToolSelected">
+                        <controls:FlyoutButton.SubItems>
+                            <models:SubToolItem Icon="/Images/line.png" Tag="Line" ToolTip="Ligne simple"/>
+                            <models:SubToolItem Icon="/Images/linebrisee.png" Tag="MultiLine" ToolTip="Ligne brisée"/>
+                            <!-- Ajoute d'autres variantes de lignes ici si tu en as -->
+                        </controls:FlyoutButton.SubItems>
+                    </controls:FlyoutButton>
+
+                    <!-- GROUPE CERCLE -->
+                    <controls:FlyoutButton MainIcon="/Images/Circle_cp.png" MainTag="Circle_cp" ToolSelected="OnToolSelected">
+                        <controls:FlyoutButton.SubItems>
+                            <models:SubToolItem Icon="/Images/Circle_cp.png" Tag="Circle_cp" ToolTip="Centre-Rayon"/>
+                            <models:SubToolItem Icon="/Images/Circle_2p.png" Tag="Circle_2P" ToolTip="Diamètre (2 pts)"/>
+                            <models:SubToolItem Icon="/Images/Circle_3p.png" Tag="Circle_3P" ToolTip="3 Points"/>
+                        </controls:FlyoutButton.SubItems>
+                    </controls:FlyoutButton>
+
+                    <!-- GROUPE LIGNE -->
+                    <controls:FlyoutButton MainIcon="/Images/Arc_CentrePoint.png" MainTag="Arc_cp" ToolSelected="OnToolSelected">
+                        <controls:FlyoutButton.SubItems>
+                            <models:SubToolItem Icon="/Images/Arc_CentrePoint.png" Tag="Arc_cp" ToolTip="Arc avec centre et point"/>
+                            <models:SubToolItem Icon="/Images/Arc_3Points.png" Tag="Arc_3P" ToolTip="Arc avec 3 points"/>
+                            <!-- Ajoute d'autres variantes de lignes ici si tu en as -->
+                        </controls:FlyoutButton.SubItems>
+                    </controls:FlyoutButton>
+
+                </StackPanel>
+            </Border>
+            <!-- Barre de saisie en bas -->
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Background="#F0F0F0" >
+                <StackPanel.Resources>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Margin" Value="5,5,2,5"/>
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                    <Style TargetType="TextBox">
+                        <Setter Property="Width" Value="50"/>
+                        <Setter Property="Margin" Value="0,5,0,5"/>
+                    </Style>
+                </StackPanel.Resources>
+
+                <TextBlock Text="X1:"/>
+                <TextBox x:Name="TxtX1" IsReadOnly="True"/>
+                <TextBlock Text="Y1:"/>
+                <TextBox x:Name="TxtY1" IsReadOnly="True"/>
+
+                <Separator Width="2" Margin="5,5"/>
+
+                <TextBlock Text="dX:"/>
+                <TextBox x:Name="TxtDX" Tag="DX" KeyDown="TxtInput_KeyDown"/>
+                <TextBlock Text="dY:"/>
+                <TextBox x:Name="TxtDY" Tag="DY" KeyDown="TxtInput_KeyDown"/>
+
+                <Separator Width="2" Margin="5,5"/>
+
+                <TextBlock x:Name="lbDist" Text="L:"/>
+                <TextBox x:Name="TxtDist" Tag="L" KeyDown="TxtInput_KeyDown"/>
+                <TextBlock x:Name="lbAngle" Text="A°:"/>
+                <TextBox x:Name="TxtAngle" Tag="A" KeyDown="TxtInput_KeyDown"/>
+            </StackPanel>
+
+            <controls:CadCanvas x:Name="MyViewport" />
+
+        </DockPanel>
+    </Grid>
+</Window>

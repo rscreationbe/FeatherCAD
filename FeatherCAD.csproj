@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Images\plume.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Images\Arc_3Points.png" />
+    <None Remove="Images\Arc_CentrePoint.png" />
+    <None Remove="Images\Circle_2p.png" />
+    <None Remove="Images\Circle_3p.png" />
+    <None Remove="Images\Circle_cp.png" />
+    <None Remove="Images\line.png" />
+    <None Remove="Images\linebrisee.png" />
+    <None Remove="Images\select.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Arc_3Points.png" />
+    <Resource Include="Images\Arc_CentrePoint.png" />
+    <Resource Include="Images\Circle_2p.png" />
+    <Resource Include="Images\Circle_3p.png" />
+    <Resource Include="Images\Circle_cp.png" />
+    <Resource Include="Images\line.png" />
+    <Resource Include="Images\linebrisee.png" />
+    <Resource Include="Images\plume.ico" />
+    <Resource Include="Images\select.png" />
+  </ItemGroup>
+
+</Project>

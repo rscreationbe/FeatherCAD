@@ -1,0 +1,19 @@
+﻿using System.Windows.Media; // Pour la couleur
+using System.Numerics;      // Pour Vector2 (nécessite .NET 6+)
+using System.Windows;       // Pour le type Point de WPF
+
+namespace FeatherCAD.Models;
+
+// "abstract" signifie qu'on ne peut pas créer un objet "Entity" tout seul.
+// On doit créer des sous-classes (Line, Circle, etc.)
+public abstract class Entity
+{
+    public Color Color { get; set; } = Colors.Black;
+    public double Thickness { get; set; } = 0.5;
+    public abstract void Move(Vector2 delta);
+
+    public DashStyle? DashStyle { get; set; } = null;
+
+    //public abstract void Draw(DrawingContext dc, Func<Vector2, Point> worldToScreen);
+    public abstract void Draw(DrawingContext dc, Func<Vector2, Point> worldToScreen, bool isSelected);
+}
