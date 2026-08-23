@@ -22,9 +22,9 @@ public enum CadToolType
 // Un élément de sous-outil, utilisé pour représenter un outil dans l'interface utilisateur
 public class SubToolItem
 {
-    public ImageSource? Icon { get; set; }  // image de l'outil (ex: un cercle pour l'outil "Circle")
-    public string? Tag { get; set; }   // L'identifiant (ex: "Circle_3P")
-    public string? ToolTip { get; set; }
+    public ImageSource Icon { get; set; } = null!;
+    public string Tag { get; set; } = string.Empty;
+    public string ToolTip { get; set; } = string.Empty;
 }
 // Types de snap disponibles pour l'accrochage
 public enum SnapType { None, End, Mid, Alignment, Perpendiculaire, Intersection }

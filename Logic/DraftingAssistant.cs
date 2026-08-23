@@ -126,16 +126,16 @@ public class DraftingAssistant
             {
                 // Liste des points remarquables du cercle
                 var circlePoints = new List<(Vector2 pt, string label)>
-        {
-            (circle.Center, "Centre"),
-            (circle.Pt1 != Vector2.Zero ? circle.Pt1 : Vector2.Zero, "Point 1"),
-            (circle.Pt2 != Vector2.Zero ? circle.Pt2 : Vector2.Zero, "Point 2"),
-            (circle.Pt3 != Vector2.Zero ? circle.Pt3 : Vector2.Zero, "Point 3"),
-            (circle.Center + new Vector2(circle.Radius, 0), "Quadrant"),
-            (circle.Center + new Vector2(-circle.Radius, 0), "Quadrant"),
-            (circle.Center + new Vector2(0, circle.Radius), "Quadrant"),
-            (circle.Center + new Vector2(0, -circle.Radius), "Quadrant")
-        };
+                {
+                    (circle.Center, "Centre"),
+                    (circle.Pt1 != Vector2.Zero ? circle.Pt1 : Vector2.Zero, "Point 1"),
+                    (circle.Pt2 != Vector2.Zero ? circle.Pt2 : Vector2.Zero, "Point 2"),
+                    (circle.Pt3 != Vector2.Zero ? circle.Pt3 : Vector2.Zero, "Point 3"),
+                    (circle.Center + new Vector2(circle.Radius, 0), "Quadrant"),
+                    (circle.Center + new Vector2(-circle.Radius, 0), "Quadrant"),
+                    (circle.Center + new Vector2(0, circle.Radius), "Quadrant"),
+                    (circle.Center + new Vector2(0, -circle.Radius), "Quadrant")
+                };
 
                 foreach (var cp in circlePoints)
                 {
@@ -146,8 +146,41 @@ public class DraftingAssistant
                     }
                 }
             }
+            else if (entity is ArcEntity arc)
+            {
+                // 1. Début et Fin
+                if (Vector2.Distance(mouse, arc.StartPoint) < threshold)
+                    return new SnapResult { WorldPoint = arc.StartPoint, Type = SnapType.End, Label = "Extrémité" };
+
+                if (Vector2.Distance(mouse, arc.EndPoint) < threshold)
+                    return new SnapResult { WorldPoint = arc.EndPoint, Type = SnapType.End, Label = "Extrémité" };
+
+                // 2. Centre
+                if (Vector2.Distance(mouse, arc.Center) < threshold)
+                    return new SnapResult { WorldPoint = arc.Center, Type = SnapType.End, Label = "Centre" };
+
+                // 3. Milieu de l'arc (Géométrique sur la courbe)
+                Vector2 midPoint = CalculateArcMidpoint(arc);
+                if (Vector2.Distance(mouse, midPoint) < threshold)
+                    return new SnapResult { WorldPoint = midPoint, Type = SnapType.Mid, Label = "Milieu" };
+            }
         }
         return null;
+    }
+    // Helper pour calculer le point milieu réel sur la courbe de l'arc
+    private Vector2 CalculateArcMidpoint(ArcEntity arc)
+    {
+        double startAngle = Math.Atan2(arc.StartPoint.Y - arc.Center.Y, arc.StartPoint.X - arc.Center.X);
+        double endAngle = Math.Atan2(arc.EndPoint.Y - arc.Center.Y, arc.EndPoint.X - arc.Center.X);
+
+        double sweep = endAngle - startAngle;
+        while (sweep < 0) sweep += 2 * Math.PI;
+
+        double midAngle = startAngle + (sweep / 2.0);
+        return new Vector2(
+            arc.Center.X + (float)(arc.Radius * Math.Cos(midAngle)),
+            arc.Center.Y + (float)(arc.Radius * Math.Sin(midAngle))
+        );
     }
     // Cette méthode vérifie si la souris est proche d'une intersection entre deux entités (lignes ou cercles) et retourne le point d'intersection le plus proche.
     private SnapResult? GetIntersectionSnap(Vector2 mouse, List<Entity> entities, float threshold)
@@ -289,6 +322,23 @@ public class DraftingAssistant
                         Type = SnapType.Alignment,
                         Label = "Sur le cercle"
                     };
+                }
+            }
+            // --- CAS DE L'ARC ---
+            if (entity is ArcEntity arc)
+            {
+                float distToCenter = Vector2.Distance(mouse, arc.Center);
+                if (Math.Abs(distToCenter - arc.Radius) < threshold)
+                {
+                    // On projette la souris sur le cercle imaginaire
+                    Vector2 dir = Vector2.Normalize(mouse - arc.Center);
+                    Vector2 pointOnCircle = arc.Center + dir * arc.Radius;
+
+                    // On vérifie si ce point appartient à la portion d'arc
+                    if (arc.IsPointOnArc(pointOnCircle, threshold))
+                    {
+                        return new SnapResult { WorldPoint = pointOnCircle, Type = SnapType.Alignment, Label = "Sur arc" };
+                    }
                 }
             }
         }

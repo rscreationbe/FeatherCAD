@@ -93,11 +93,12 @@ namespace FeatherCAD.Tools
         }
 
         // Méthode d'aide pour savoir si la souris touche une entité spécifique
-        private bool IsEntityHit(Models.Entity entity, Vector2 pos, float threshold)
+        private bool IsEntityHit(Entity entity, Vector2 pos, float threshold)
         {
-            if (entity is Models.LineEntity l) return GeometryUtils.IsPointNearLine(pos, l.Start, l.End, threshold);
-            if (entity is Models.CircleEntity c) return Math.Abs(Vector2.Distance(pos, c.Center) - c.Radius) < threshold;
-            if (entity is Models.GroupEntity g) return g.IsPointInside(pos, threshold);
+            if (entity is LineEntity l) return GeometryUtils.IsPointNearLine(pos, l.Start, l.End, threshold);
+            if (entity is CircleEntity c) return Math.Abs(Vector2.Distance(pos, c.Center) - c.Radius) < threshold;
+            if (entity is ArcEntity a) return Math.Abs(Vector2.Distance(pos, a.Center) - a.Radius) < threshold && a.IsPointOnArc(pos, threshold);
+            if (entity is GroupEntity g) return g.IsPointInside(pos, threshold);
             return false;
         }
 
@@ -110,15 +111,3 @@ namespace FeatherCAD.Tools
         }
     }
 }
-
-//public override string GetInstruction()
-//{
-//    bool isShiftDown = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
-
-//    if (isShiftDown)
-//    {
-//        return "Extension de la sélection : Sélectionnez d'autres objets.";
-//    }
-
-//    return "Sélectionnez : Sélectionnez [Maj = Etendre la sélection].";
-//}

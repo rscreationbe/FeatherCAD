@@ -15,7 +15,8 @@ public class CadCanvas : FrameworkElement
     public List<Entity> Entities { get; set; } = [];
     public LineEntity? PreviewLine { get; set; }
     public CircleEntity? PreviewCircle { get; set; }
-    public List<Entity> SelectedEntities { get; } = [];
+    public ArcEntity? PreviewArc { get; set; }
+    public List<Entity> SelectedEntities { get; } = []; 
     public Entity? SelectedEntity => SelectedEntities.LastOrDefault();
 
     // --- VUE & CAMERA ---
@@ -76,7 +77,9 @@ public class CadCanvas : FrameworkElement
             { CadToolType.Line, new LineTool(this) },
             { CadToolType.Circle_cp, new CircleTool(this) },
             { CadToolType.Circle_2P, new Circle2PTool(this) },
-            { CadToolType.Circle_3P, new Circle3PTool(this) }
+            { CadToolType.Circle_3P, new Circle3PTool(this) },
+            { CadToolType.Arc_cp, new ArcTool(this) },
+            //{ CadToolType.Arc_3P, new Arc3PTool(this) }
         };
 
         _activeTool = _tools[CadToolType.Select];
@@ -212,6 +215,9 @@ public class CadCanvas : FrameworkElement
             // CAS CERCLE
             else if (Entities[i] is CircleEntity circle && Math.Abs(Vector2.Distance(mousePos, circle.Center) - circle.Radius) < threshold)
             { found = circle; break; }
+            // CAS ARC
+            else if (Entities[i] is ArcEntity arc && Math.Abs(Vector2.Distance(mousePos, arc.Center) - arc.Radius) < threshold && arc.IsPointOnArc(mousePos, threshold))
+            { found = arc; break; }
         }
 
         // 2. Gérer la logique SHIFT
@@ -331,6 +337,7 @@ public class CadCanvas : FrameworkElement
 
         PreviewLine?.Draw(dc, WorldToScreen, false);
         PreviewCircle?.Draw(dc, WorldToScreen, false);
+        PreviewArc?.Draw(dc, WorldToScreen, false);
 
         // Dessin des poignées si sélection
         foreach (var sel in SelectedEntities)
@@ -348,6 +355,13 @@ public class CadCanvas : FrameworkElement
                 if (c.Pt2 != Vector2.Zero) DrawHandle(dc, c.Pt2);
                 if (c.Pt3 != Vector2.Zero) DrawHandle(dc, c.Pt3);
             }
+            else if (sel is ArcEntity a)
+            {
+                DrawHandle(dc, a.Center);
+                if (a.StartPoint != Vector2.Zero) DrawHandle(dc, a.StartPoint);
+                if (a.EndPoint != Vector2.Zero) DrawHandle(dc, a.EndPoint);
+            }
+
         }
 
         if (IsBoxSelecting)

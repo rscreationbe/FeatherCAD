@@ -51,42 +51,41 @@
                 </StackPanel>
             </Border>
             
-            <!-- Barre d'outils à gauche -->
-            <Border DockPanel.Dock="Left" Background="#E0E0E0" Width="40" BorderBrush="Gray" BorderThickness="0,0,2,0">
-                <StackPanel Grid.Column="0" Background="#F0F0F0">
+            <!-- 3. BARRE D'OUTILS À GAUCHE -->
+            <Border Grid.Column="0" Background="#D0D0D0" BorderBrush="Gray" BorderThickness="0,0,1,0">
+                <StackPanel Grid.Column="0" Background="#D0D0D0">
 
-                    <!-- GROUPE SÉLECTION -->
+                    <!-- SÉLECTION -->
                     <controls:FlyoutButton MainIcon="/Images/select.png" MainTag="Select" ToolSelected="OnToolSelected"/>
 
-                    <!-- GROUPE LIGNE -->
+                    <!-- LIGNE -->
                     <controls:FlyoutButton MainIcon="/Images/line.png" MainTag="Line" ToolSelected="OnToolSelected">
                         <controls:FlyoutButton.SubItems>
-                            <models:SubToolItem Icon="/Images/line.png" Tag="Line" ToolTip="Ligne simple"/>
+                            <models:SubToolItem Icon="/Images/line.png" Tag="Line" ToolTip="Ligne Point-Point"/>
                             <models:SubToolItem Icon="/Images/linebrisee.png" Tag="MultiLine" ToolTip="Ligne brisée"/>
-                            <!-- Ajoute d'autres variantes de lignes ici si tu en as -->
                         </controls:FlyoutButton.SubItems>
                     </controls:FlyoutButton>
 
-                    <!-- GROUPE CERCLE -->
-                    <controls:FlyoutButton MainIcon="/Images/Circle_cp.png" MainTag="Circle_cp" ToolSelected="OnToolSelected">
+                    <!-- CERCLE -->
+                    <controls:FlyoutButton MainIcon="/Images/circle_cp.png" MainTag="Circle_cp" ToolSelected="OnToolSelected">
                         <controls:FlyoutButton.SubItems>
-                            <models:SubToolItem Icon="/Images/Circle_cp.png" Tag="Circle_cp" ToolTip="Centre-Rayon"/>
-                            <models:SubToolItem Icon="/Images/Circle_2p.png" Tag="Circle_2P" ToolTip="Diamètre (2 pts)"/>
-                            <models:SubToolItem Icon="/Images/Circle_3p.png" Tag="Circle_3P" ToolTip="3 Points"/>
+                            <models:SubToolItem Icon="/Images/circle_cp.png" Tag="Circle_cp" ToolTip="Centre-Point"/>
+                            <models:SubToolItem Icon="/Images/circle_2p.png" Tag="Circle_2P" ToolTip="Diamètre (2 pts)"/>
+                            <models:SubToolItem Icon="/Images/circle_3p.png" Tag="Circle_3P" ToolTip="3 Points"/>
                         </controls:FlyoutButton.SubItems>
                     </controls:FlyoutButton>
 
-                    <!-- GROUPE LIGNE -->
+                    <!-- ARC -->
                     <controls:FlyoutButton MainIcon="/Images/Arc_CentrePoint.png" MainTag="Arc_cp" ToolSelected="OnToolSelected">
                         <controls:FlyoutButton.SubItems>
                             <models:SubToolItem Icon="/Images/Arc_CentrePoint.png" Tag="Arc_cp" ToolTip="Arc avec centre et point"/>
                             <models:SubToolItem Icon="/Images/Arc_3Points.png" Tag="Arc_3P" ToolTip="Arc avec 3 points"/>
-                            <!-- Ajoute d'autres variantes de lignes ici si tu en as -->
                         </controls:FlyoutButton.SubItems>
                     </controls:FlyoutButton>
-
                 </StackPanel>
             </Border>
+            
+            
             <!-- Barre de saisie en bas -->
             <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Background="#F0F0F0" >
                 <StackPanel.Resources>
