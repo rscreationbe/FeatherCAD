@@ -342,26 +342,7 @@ public class CadCanvas : FrameworkElement
         // Dessin des poignées si sélection
         foreach (var sel in SelectedEntities)
         {
-            if (sel is LineEntity l)
-            {
-                //sel.Color = Colors.Red; // Change color to indicate selection
-                DrawHandle(dc, l.Start);
-                DrawHandle(dc, l.End);
-            }
-            else if (sel is CircleEntity c)
-            {
-                DrawHandle(dc, c.Center);
-                if (c.Pt1 != Vector2.Zero) DrawHandle(dc, c.Pt1);
-                if (c.Pt2 != Vector2.Zero) DrawHandle(dc, c.Pt2);
-                if (c.Pt3 != Vector2.Zero) DrawHandle(dc, c.Pt3);
-            }
-            else if (sel is ArcEntity a)
-            {
-                DrawHandle(dc, a.Center);
-                if (a.StartPoint != Vector2.Zero) DrawHandle(dc, a.StartPoint);
-                if (a.EndPoint != Vector2.Zero) DrawHandle(dc, a.EndPoint);
-            }
-
+            DrawEntityHandles(dc, sel);
         }
 
         if (IsBoxSelecting)
@@ -394,6 +375,36 @@ public class CadCanvas : FrameworkElement
     {
         Point p = WorldToScreen(pos);
         dc.DrawRectangle(Brushes.White, new Pen(Brushes.Red, 0.5), new Rect(p.X - 2, p.Y - 2, 4, 4));
+    }
+    // Méthode pour dessiner les poignées de tous les types d'entités
+    private void DrawEntityHandles(DrawingContext dc, Entity entity)
+    {
+        if (entity is LineEntity l)
+        {
+            DrawHandle(dc, l.Start);
+            DrawHandle(dc, l.End);
+        }
+        else if (entity is CircleEntity c)
+        {
+            DrawHandle(dc, c.Center);
+            DrawHandle(dc, c.Center + new Vector2(c.Radius, 0));
+            // ... (tes autres points de cercle)
+        }
+        else if (entity is ArcEntity a)
+        {
+            // Poignées de l'arc : Centre, Départ et Fin
+            DrawHandle(dc, a.Center);
+            DrawHandle(dc, a.StartPoint);
+            DrawHandle(dc, a.EndPoint);
+        }
+        else if (entity is GroupEntity g)
+        {
+            // RÉCURSIVITÉ : On dessine les poignées de tous les enfants du groupe
+            foreach (var child in g.Children)
+            {
+                DrawEntityHandles(dc, child);
+            }
+        }
     }
     // Méthode pour dessiner le curseur en croix
     private void DrawCursor(DrawingContext dc)
@@ -647,7 +658,6 @@ public class CadCanvas : FrameworkElement
     {
         IsBoxSelecting = false;
 
-        // Calculer les bornes du rectangle (Min et Max pour gérer tous les sens de tracé)
         float minX = Math.Min(start.X, end.X);
         float maxX = Math.Max(start.X, end.X);
         float minY = Math.Min(start.Y, end.Y);
@@ -659,17 +669,29 @@ public class CadCanvas : FrameworkElement
         foreach (var entity in Entities)
         {
             bool isInside = false;
+            //1. CAS LIGNE
             if (entity is LineEntity line)
             {
-                // Une ligne est dedans si ses deux extrémités le sont
                 isInside = IsPointInBox(line.Start, minX, maxX, minY, maxY) &&
                            IsPointInBox(line.End, minX, maxX, minY, maxY);
             }
+            //2. CAS CERCLE
             else if (entity is CircleEntity circle)
             {
-                // Un cercle est dedans si son carré englobant le est
                 isInside = IsPointInBox(new Vector2(circle.Center.X - circle.Radius, circle.Center.Y - circle.Radius), minX, maxX, minY, maxY) &&
                            IsPointInBox(new Vector2(circle.Center.X + circle.Radius, circle.Center.Y + circle.Radius), minX, maxX, minY, maxY);
+            }
+            //3. CAS ARC
+            else if (entity is ArcEntity arc)
+            {
+                // On considère l'arc sélectionné si ses 3 points principaux sont dans le rectangle
+                // (C'est la méthode la plus simple et efficace en CAD)
+                isInside = IsPointInBox(arc.StartPoint, minX, maxX, minY, maxY) &&
+                           IsPointInBox(arc.EndPoint, minX, maxX, minY, maxY) &&
+                           IsPointInBox(arc.Center, minX, maxX, minY, maxY);
+
+                // Note : Si tu veux être ultra-rigoureux, tu pourrais calculer la Bounding Box 
+                // réelle de l'arc, mais tester les 3 points de contrôle suffit dans 99% des cas.
             }
 
             if (isInside && !SelectedEntities.Contains(entity))

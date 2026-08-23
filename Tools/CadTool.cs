@@ -7,7 +7,6 @@ namespace FeatherCAD.Tools;
 public abstract class CadTool
 {
     protected Controls.CadCanvas Canvas;
-    private CadToolType _type;
 
 
     public CadTool(Controls.CadCanvas canvas)

@@ -3,6 +3,52 @@ using FeatherCAD.Models;
 
 public static class GeometryUtils
 {
+    public static List<Vector2> GetEntitiesIntersections(Entity e1, Entity e2)
+    {
+        List<Vector2> points = new List<Vector2>();
+
+        // --- CAS 1 : LIGNE / LIGNE ---
+        if (e1 is LineEntity l1 && e2 is LineEntity l2)
+        {
+            if (FindIntersection(l1.Start, l1.End, l2.Start, l2.End, out Vector2 inter))
+                points.Add(inter);
+        }
+        // --- CAS 2 : LIGNE / CERCLE ---
+        else if (e1 is LineEntity line && e2 is CircleEntity circ)
+        {
+            points.AddRange(FindLineCircleIntersections(line.Start, line.End, circ.Center, circ.Radius));
+        }
+        else if (e1 is CircleEntity circ2 && e2 is LineEntity line2)
+        {
+            points.AddRange(FindLineCircleIntersections(line2.Start, line2.End, circ2.Center, circ2.Radius));
+        }
+        // --- CAS 3 : CERCLE / CERCLE ---
+        else if (e1 is CircleEntity c1 && e2 is CircleEntity c2)
+        {
+            points.AddRange(FindCircleCircleIntersections(c1.Center, c1.Radius, c2.Center, c2.Radius));
+        }
+        // --- CAS 4 : ARC / (LIGNE, CERCLE ou ARC) ---
+        // On calcule l'intersection comme s'il s'agissait de cercles/lignes, 
+        // puis on filtre si le point est réellement sur l'arc.
+        else if (e1 is ArcEntity || e2 is ArcEntity)
+        {
+            // On transforme temporairement l'arc en cercle pour le calcul
+            Entity shadow1 = e1 is ArcEntity a1 ? new CircleEntity(a1.Center, a1.Radius, System.Windows.Media.Colors.Black, 1) : e1;
+            Entity shadow2 = e2 is ArcEntity a2 ? new CircleEntity(a2.Center, a2.Radius, System.Windows.Media.Colors.Black, 1) : e2;
+
+            var rawPoints = GetEntitiesIntersections(shadow1, shadow2);
+            foreach (var p in rawPoints)
+            {
+                bool valid = true;
+                if (e1 is ArcEntity arc1 && !arc1.IsPointOnArc(p, 0.1f)) valid = false;
+                if (e2 is ArcEntity arc2 && !arc2.IsPointOnArc(p, 0.1f)) valid = false;
+
+                if (valid) points.Add(p);
+            }
+        }
+
+        return points;
+    }
     // Calcule l'intersection de deux segments de ligne AB et CD
     public static bool FindIntersection(Vector2 A, Vector2 B, Vector2 C, Vector2 D, out Vector2 result)
     {

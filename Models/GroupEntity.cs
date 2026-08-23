@@ -30,11 +30,19 @@ namespace FeatherCAD.Models
         {
             foreach (var child in Children)
             {
+                // 1. CAS D'UNE LIGNE : On vérifie si le point est proche de la ligne
                 if (child is LineEntity l && GeometryUtils.IsPointNearLine(mousePos, l.Start, l.End, threshold))
                     return true;
-
+                // 2. CAS D'UN CERCLE : On vérifie si le point est proche du cercle
                 if (child is CircleEntity c && Math.Abs(Vector2.Distance(mousePos, c.Center) - c.Radius) < threshold)
                     return true;
+                // 3. CAS D'UN ARC : On vérifie si le point est proche de l'arc
+                if (child is ArcEntity a)
+                {
+                    float distToCenter = Vector2.Distance(mousePos, a.Center);
+                    if (Math.Abs(distToCenter - a.Radius) < threshold && a.IsPointOnArc(mousePos, threshold))
+                        return true;
+                }
 
                 // Récursivité : si l'enfant est lui-même un groupe
                 if (child is GroupEntity g && g.IsPointInside(mousePos, threshold))

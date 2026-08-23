@@ -56,7 +56,7 @@ namespace FeatherCAD.Tools
                 }
             }
         }
-
+        // 4. On gère le déplacement de la souris
         public override void OnMouseMove(Vector2 worldPos, MouseEventArgs e)
         {
             if (_isDragging)
@@ -77,7 +77,7 @@ namespace FeatherCAD.Tools
                 Canvas.BoxEndWorld = worldPos;
             }
         }
-
+        // 5. On gère le relâchement de la souris
         public override void OnMouseUp(MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -101,7 +101,7 @@ namespace FeatherCAD.Tools
             if (entity is GroupEntity g) return g.IsPointInside(pos, threshold);
             return false;
         }
-
+        // 6. On fournit des instructions à l'utilisateur
         public override string GetInstruction()
         {
             if (_isDragging) return "DÉPLACEMENT : Relâchez pour valider la position.";
