@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Images\Arc_3Points.png" />
     <Resource Include="Images\Arc_CentrePoint.png" />
     <Resource Include="Images\Circle_2p.png" />

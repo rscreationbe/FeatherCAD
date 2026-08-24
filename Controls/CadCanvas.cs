@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace FeatherCAD.Controls;
 
@@ -50,6 +51,7 @@ public class CadCanvas : FrameworkElement
     public bool IsBoxSelecting { get; set; } = false;
     public Vector2 BoxStartWorld { get; set; }
     public Vector2 BoxEndWorld { get; set; }
+    public Layer ActiveLayer { get; set; }
 
     #endregion
 
@@ -70,6 +72,10 @@ public class CadCanvas : FrameworkElement
         this.Focusable = true;
         this.ClipToBounds = true;
 
+        //ActiveLayer = Layers[0];
+        var defaultLayer = Layers[0];
+        defaultLayer.IsActiveLayer = true;
+        ActiveLayer = defaultLayer;
 
         _tools = new Dictionary<CadToolType, CadTool>
         {
@@ -132,7 +138,7 @@ public class CadCanvas : FrameworkElement
     {
         IsDrawing = false;
         IsEditing = true;
-        var finalLine = new LineEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness);
+        var finalLine = new LineEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness) { LayerName = ActiveLayer.Name };
         Entities.Add(finalLine);
         SelectedEntities.Add(finalLine);
         PreviewLine = null;
@@ -152,7 +158,8 @@ public class CadCanvas : FrameworkElement
             // Création de l'entité finale
             finalCircle = new CircleEntity(TempStartPoint, radius, CurrentDrawingColor, CurrentThickness)
             {
-                Pt1 = pos
+                Pt1 = pos,
+                LayerName = ActiveLayer.Name
             };
         }
         if (CurrentTool == CadToolType.Circle_2P)
@@ -165,7 +172,8 @@ public class CadCanvas : FrameworkElement
             {
                 Center = (TempStartPoint + pos) / 2,
                 Pt1 = TempStartPoint,
-                Pt2 = pos
+                Pt2 = pos,
+                LayerName = ActiveLayer.Name
             };
         }
         if (CurrentTool == CadToolType.Circle_3P)
@@ -175,7 +183,8 @@ public class CadCanvas : FrameworkElement
             finalCircle = new CircleEntity(TempStartPoint, radius, CurrentDrawingColor, CurrentThickness)
             {
                 Pt1 = TempStartPoint,
-                Pt2 = pos
+                Pt2 = pos,
+                LayerName = ActiveLayer.Name
             };
         }
 
@@ -328,12 +337,22 @@ public class CadCanvas : FrameworkElement
 
         foreach (var entity in Entities)
         {
-            // On vérifie si cette entité est dans la liste des sélectionnés
-            bool isSelected = SelectedEntities.Contains(entity);
-
-            // On passe l'info à la méthode Draw
-            entity.Draw(dc, WorldToScreen, isSelected);
+            var layer = Layers.FirstOrDefault(l => l.Name == entity.LayerName);
+            if (layer == null || layer.IsVisible)
+            {
+                bool isSelected = SelectedEntities.Contains(entity);
+                entity.Draw(dc, WorldToScreen, isSelected);
+            }
         }
+
+        //foreach (var entity in Entities)
+        //{
+        //    // On vérifie si cette entité est dans la liste des sélectionnés
+        //    bool isSelected = SelectedEntities.Contains(entity);
+
+        //    // On passe l'info à la méthode Draw
+        //    entity.Draw(dc, WorldToScreen, isSelected);
+        //}
 
         PreviewLine?.Draw(dc, WorldToScreen, false);
         PreviewCircle?.Draw(dc, WorldToScreen, false);
@@ -745,6 +764,13 @@ public class CadCanvas : FrameworkElement
         DeselectAll();
         InvalidateVisual();
     }
+    #endregion
+
+    #region LAYERS
+    public ObservableCollection<Layer> Layers { get; set; } = new()
+    {
+        new Layer { Name = "Calque 1", Color = Colors.Black }
+    };
     #endregion
 
 }

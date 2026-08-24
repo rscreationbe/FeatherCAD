@@ -24,6 +24,8 @@
                     <MenuItem Header="_Grouper" InputGestureText="Ctrl+G" Click="MenuGroup_Click"/>
                     <MenuItem Header="_Dégrouper" InputGestureText="Ctrl+U" Click="MenuUngroup_Click"/>
                     <Separator />
+                    <MenuItem Header="_Calques..." Click="MenuLayers_Click" />
+                    <Separator />
                     <MenuItem Header="_Tout sélectionner" InputGestureText="Ctrl+A" Click="MenuSelectAll_Click"/>
                     <MenuItem Header="_Supprimer" Click="MenuDelete_Click" InputGestureText="Suppr" />
                 </MenuItem>

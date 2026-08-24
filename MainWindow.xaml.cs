@@ -1,5 +1,6 @@
 ﻿
 using FeatherCAD.Controls;
+using FeatherCAD.Logic;
 using FeatherCAD.Models;
 using FeatherCAD.Tools;
 using System.Numerics;
@@ -213,7 +214,7 @@ public partial class MainWindow : Window
 
     private void MenuNew_Click(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show("Voulez-vous créer un nouveau dessin ? Tout le travail non enregistré sera perdu.",
+        if (MessageBox.Show("Voulez-vous créer un nouveau dessin ?\nTout le travail non enregistré sera perdu.",
             "Nouveau", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
         {
             MyViewport.Entities.Clear();
@@ -311,12 +312,45 @@ public partial class MainWindow : Window
 
     private void MenuOpen_Click(object sender, RoutedEventArgs e)
     {
+        var loadedProject = FileManager.Open();
+        if (loadedProject != null)
+        {
+            // 1. Charger les calques
+            MyViewport.Layers.Clear();
+            foreach (var layer in loadedProject.Layers)
+            {
+                MyViewport.Layers.Add(layer);
+            }
 
+            // 2. Charger les entités
+            MyViewport.Entities = loadedProject.Entities;
+
+            // 3. Restaurer le calque actif
+            var active = MyViewport.Layers.FirstOrDefault(l => l.Name == loadedProject.ActiveLayerName)
+                         ?? MyViewport.Layers.FirstOrDefault();
+
+            if (active != null)
+            {
+                MyViewport.ActiveLayer = active;
+                active.IsActiveLayer = true; // Pour cocher le RadioButton dans l'UI
+            }
+
+            MyViewport.DeselectAll();
+            MyViewport.InvalidateVisual();
+        }
     }
 
     private void MenuSave_Click(object sender, RoutedEventArgs e)
     {
+        // On prépare le conteneur avec les données actuelles du Canvas
+        var project = new CadProject
+        {
+            Entities = MyViewport.Entities,
+            Layers = MyViewport.Layers.ToList(), // On convertit l'ObservableCollection en List
+            ActiveLayerName = MyViewport.ActiveLayer?.Name ?? "Calque 1"
+        };
 
+        FileManager.Save(project);
     }
 
     private void MenuSelectAll_Click(object sender, RoutedEventArgs e)
@@ -386,5 +420,12 @@ public partial class MainWindow : Window
     private void MenuUngroup_Click(object sender, RoutedEventArgs e)
     {
         MyViewport.UngroupSelectedEntities();
+    }
+
+    private void MenuLayers_Click(object sender, RoutedEventArgs e)
+    {
+        LayersWindow win = new LayersWindow(MyViewport);
+        win.Owner = this;
+        win.Show(); // On utilise Show pour pouvoir dessiner tout en gardant la fenêtre ouverte
     }
 }

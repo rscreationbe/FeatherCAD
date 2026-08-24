@@ -10,10 +10,11 @@ public abstract class Entity
 {
     public Color Color { get; set; } = Colors.Black;
     public double Thickness { get; set; } = 0.5;
-    public abstract void Move(Vector2 delta);
-
     public DashStyle? DashStyle { get; set; } = null;
+    public string LayerName { get; set; } = "Calque 1";
 
-    //public abstract void Draw(DrawingContext dc, Func<Vector2, Point> worldToScreen);
+    // méthode abstraite pour déplacer l'entité, à implémenter dans les sous-classes
+    public abstract void Move(Vector2 delta);
+    // méthode abstraite pour dessiner l'entité, à implémenter dans les sous-classes
     public abstract void Draw(DrawingContext dc, Func<Vector2, Point> worldToScreen, bool isSelected);
 }
