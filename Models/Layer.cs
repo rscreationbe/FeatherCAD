@@ -9,13 +9,14 @@ namespace FeatherCAD.Models
         private string _name = "Calque 1";
         private bool _isVisible = true;
         private bool _isLocked = false;
+        private bool _isActiveLayer;
         private Color _color = Colors.Black;
 
-        public string Name
-        {
-            get => _name;
-            set { _name = value; OnPropertyChanged(); }
-        }
+        //public string Name
+        //{
+        //    get => _name;
+        //    set { _name = value; OnPropertyChanged(); }
+        //}
 
         public bool IsVisible
         {
@@ -34,7 +35,7 @@ namespace FeatherCAD.Models
             get => _color;
             set { _color = value; OnPropertyChanged(); }
         }
-        private bool _isActiveLayer;
+
         public bool IsActiveLayer
         {
             get => _isActiveLayer;
@@ -47,6 +48,24 @@ namespace FeatherCAD.Models
                 }
             }
         }
+        public string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    string oldName = _name;
+                    _name = value;
+                    OnPropertyChanged();
+                    // On déclenche un événement personnalisé pour le Canvas
+                    Renamed?.Invoke(this, (oldName, value));
+                }
+            }
+        }
+
+        // Événement spécifique pour notifier le renommage (AncienNom, NouveauNom)
+        public event EventHandler<(string OldName, string NewName)>? Renamed;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string? name = null)

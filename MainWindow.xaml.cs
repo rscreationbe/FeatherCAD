@@ -283,6 +283,7 @@ public partial class MainWindow : Window
                 }
                 MyViewport.InvalidateVisual();
             }
+            MyViewport.ActiveLayer.Color = picker.SelectedColor; // On change la couleur du calque actif
         }
     }
     private void MenuWeight_Click(object sender, RoutedEventArgs e)
@@ -313,33 +314,51 @@ public partial class MainWindow : Window
     private void MenuOpen_Click(object sender, RoutedEventArgs e)
     {
         var loadedProject = FileManager.Open();
-        if (loadedProject != null)
+
+        // Si l'utilisateur a annulé ou si le fichier est corrompu, on arrête là
+        if (loadedProject == null) return;
+
+        // 1. RIGUEUR : On stoppe toute action en cours avant de vider les listes
+        MyViewport.DeselectAll();
+        MyViewport.StopDrawing();
+
+        // 2. CHARGEMENT DES CALQUES
+        MyViewport.Layers.Clear();
+        foreach (var layer in loadedProject.Layers)
         {
-            // 1. Charger les calques
-            MyViewport.Layers.Clear();
-            foreach (var layer in loadedProject.Layers)
-            {
-                MyViewport.Layers.Add(layer);
-            }
+            // TRÈS IMPORTANT : Utilisez votre méthode AddLayer(layer)
+            // C'est elle qui fait le branchement : layer.Renamed += OnLayerRenamed;
+            MyViewport.AddLayer(layer);
+        }
 
-            // 2. Charger les entités
-            MyViewport.Entities = loadedProject.Entities;
+        // 3. CHARGEMENT DES ENTITÉS
+        // On remplace la liste complète
+        MyViewport.Entities = loadedProject.Entities ?? new List<Entity>();
 
-            // 3. Restaurer le calque actif
+        // 4. RESTAURATION DU CALQUE ACTIF
+        // On cherche le calque par son nom sauvé, sinon on prend le premier par défaut
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
             var active = MyViewport.Layers.FirstOrDefault(l => l.Name == loadedProject.ActiveLayerName)
                          ?? MyViewport.Layers.FirstOrDefault();
 
             if (active != null)
             {
+                // On passe par la propriété ActiveLayer du Canvas. 
+                // Comme nous l'avons codée, elle va automatiquement :
+                // - Mettre à jour le flag IsActiveLayer du calque
+                // - Notifier la ComboBox en bas (Binding)
+                // - Notifier le gestionnaire de calques
                 MyViewport.ActiveLayer = active;
-                active.IsActiveLayer = true; // Pour cocher le RadioButton dans l'UI
             }
 
-            MyViewport.DeselectAll();
+            // 5. FINALISATION
             MyViewport.InvalidateVisual();
-        }
-    }
 
+            // Optionnel : Mettre à jour le titre de la fenêtre avec le nom du fichier
+            // this.Title = $"FeatherCAD - {loadedProject.ProjectName}";
+        }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+    }
     private void MenuSave_Click(object sender, RoutedEventArgs e)
     {
         // On prépare le conteneur avec les données actuelles du Canvas

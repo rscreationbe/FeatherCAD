@@ -1,11 +1,13 @@
 ﻿using FeatherCAD.Logic;
 using FeatherCAD.Models;
 using FeatherCAD.Tools;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Collections.ObjectModel;
 
 namespace FeatherCAD.Controls;
 
@@ -38,6 +40,7 @@ public class CadCanvas : FrameworkElement
     private DraftingAssistant _assistant = new();
     private SnapResult _currentSnap = new() { Type = SnapType.None };
     private CadTool _activeTool;
+    private Layer _activeLayer;
     private CadToolType _currentToolType = CadToolType.Select; // Le type (Enum)
 
     //public CadTool ActiveTool => _activeTool;
@@ -51,7 +54,7 @@ public class CadCanvas : FrameworkElement
     public bool IsBoxSelecting { get; set; } = false;
     public Vector2 BoxStartWorld { get; set; }
     public Vector2 BoxEndWorld { get; set; }
-    public Layer ActiveLayer { get; set; }
+
 
     #endregion
 
@@ -64,6 +67,12 @@ public class CadCanvas : FrameworkElement
     public event EventHandler<CadToolType>? ToolChanged;
     // Événement pour notifier que le texte d'aide doit changer
     public event EventHandler<string>? StatusChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
+    // Méthode pour notifier les changements de propriété
+    protected void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
     #endregion
 
     public CadCanvas()
@@ -771,6 +780,85 @@ public class CadCanvas : FrameworkElement
     {
         new Layer { Name = "Calque 1", Color = Colors.Black }
     };
+    //public void AddLayer(Layer layer)
+    //{
+    //    layer.Renamed += OnLayerRenamed;
+    //    Layers.Add(layer);
+    //}
+
+    //private void OnLayerRenamed(object? sender, (string OldName, string NewName) e)
+    //{
+    //    // Rigueur CAD : On parcourt TOUTES les entités pour mettre à jour leur référence
+    //    foreach (var entity in Entities)
+    //    {
+    //        UpdateEntityLayerName(entity, e.OldName, e.NewName);
+    //    }
+    //}
+
+    //// Méthode récursive pour gérer aussi les groupes
+    //private void UpdateEntityLayerName(Entity entity, string oldName, string newName)
+    //{
+    //    if (entity.LayerName == oldName)
+    //    {
+    //        entity.LayerName = newName;
+    //    }
+
+    //    if (entity is GroupEntity group)
+    //    {
+    //        foreach (var child in group.Children)
+    //        {
+    //            UpdateEntityLayerName(child, oldName, newName);
+    //        }
+    //    }
+    //}
+    public Layer ActiveLayer
+    {
+        get => _activeLayer;
+        set
+        {
+            if (_activeLayer != value && value != null)
+            {
+                _activeLayer = value;
+
+                // Rigueur : On synchronise le flag booléen pour les RadioButtons de l'UI
+                foreach (var l in Layers)
+                {
+                    l.IsActiveLayer = (l == _activeLayer);
+                }
+
+                // On notifie les abonnés (comme la MainWindow)
+                OnPropertyChanged(nameof(ActiveLayer));
+                InvalidateVisual();
+            }
+        }
+    }
+    public void AddLayer(Layer layer)
+    {
+        // 1. On s'abonne à l'événement de renommage pour propager le nom aux entités
+        layer.Renamed += OnLayerRenamed;
+
+        // 2. On l'ajoute à la collection pour l'UI
+        Layers.Add(layer);
+    }
+
+    // Rappel de la méthode de propagation (déjà vue ensemble)
+    private void OnLayerRenamed(object? sender, (string OldName, string NewName) e)
+    {
+        foreach (var entity in Entities)
+        {
+            UpdateEntityLayerName(entity, e.OldName, e.NewName);
+        }
+        InvalidateVisual();
+    }
+
+    private void UpdateEntityLayerName(Entity entity, string oldName, string newName)
+    {
+        if (entity.LayerName == oldName) entity.LayerName = newName;
+        if (entity is GroupEntity group)
+        {
+            foreach (var child in group.Children) UpdateEntityLayerName(child, oldName, newName);
+        }
+    }
     #endregion
 
 }

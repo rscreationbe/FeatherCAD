@@ -18,7 +18,16 @@ namespace FeatherCAD
 
         private void AddLayer_Click(object sender, RoutedEventArgs e)
         {
-            _canvas.Layers.Add(new Layer { Name = $"Calque {_canvas.Layers.Count + 1}" });
+            // On crée l'objet
+            var newLayer = new Layer
+            {
+                Name = $"Calque {_canvas.Layers.Count + 1}",
+                Color = System.Windows.Media.Colors.Black // Couleur par défaut
+            };
+
+            // RIGOUREUX : On utilise une méthode du Canvas pour l'ajouter 
+            // afin qu'il puisse s'abonner aux événements du calque.
+            _canvas.AddLayer(newLayer);
         }
 
         private void DeleteLayer_Click(object sender, RoutedEventArgs e)

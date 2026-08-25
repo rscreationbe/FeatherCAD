@@ -42,7 +42,10 @@ namespace FeatherCAD.Tools
                 Vector2 dir = Vector2.Normalize(worldPos - _center);
                 Vector2 finalEnd = _center + dir * radius;
 
-                var arc = new ArcEntity(_center, _startPoint, finalEnd, Canvas.CurrentDrawingColor, Canvas.CurrentThickness);
+                var arc = new ArcEntity(_center, _startPoint, finalEnd, Canvas.CurrentDrawingColor, Canvas.CurrentThickness)
+                {
+                    LayerName = Canvas.ActiveLayer.Name
+                };
                 Canvas.Entities.Add(arc);
                 Canvas.SetSingleSelection(arc);
                 Finish();
