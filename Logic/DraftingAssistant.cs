@@ -132,7 +132,30 @@ namespace FeatherCAD.Logic
                     points.Add((a.Center, "Centre"));
                     points.Add((CalculateArcMidpoint(a), "Milieu"));
                 }
+                else if (entity is RectangleEntity rect)
+                {
+                    var corners = new List<(Vector2 pt, string label)>
+                    {
+                        (new Vector2(rect.Left, rect.Top), "Coin"),
+                        (new Vector2(rect.Right, rect.Top), "Coin"),
+                        (new Vector2(rect.Left, rect.Bottom), "Coin"),
+                        (new Vector2(rect.Right, rect.Bottom), "Coin"),
+                        // Milieux des segments
+                        (new Vector2((rect.Left + rect.Right)/2, rect.Top), "Milieu"),
+                        (new Vector2((rect.Left + rect.Right)/2, rect.Bottom), "Milieu"),
+                        (new Vector2(rect.Left, (rect.Top + rect.Bottom)/2), "Milieu"),
+                        (new Vector2(rect.Right, (rect.Top + rect.Bottom)/2), "Milieu")
+                    };
 
+                    foreach (var cp in corners)
+                    {
+                        if (Vector2.Distance(mouse, cp.pt) < threshold)
+                        {
+                            UpdateMemory(cp.pt);
+                            return new SnapResult { WorldPoint = cp.pt, Type = SnapType.End, Label = cp.label };
+                        }
+                    }
+                }
                 foreach (var p in points)
                 {
                     if (Vector2.Distance(mouse, p.pt) < threshold)

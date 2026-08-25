@@ -1,6 +1,7 @@
 ﻿using FeatherCAD.Logic;
 using FeatherCAD.Models;
 using FeatherCAD.Tools;
+using FeatherCAD;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Numerics;
@@ -19,6 +20,7 @@ public class CadCanvas : FrameworkElement
     public LineEntity? PreviewLine { get; set; }
     public CircleEntity? PreviewCircle { get; set; }
     public ArcEntity? PreviewArc { get; set; }
+    public RectangleEntity? PreviewRectangle { get; set; }
     public List<Entity> SelectedEntities { get; } = []; 
     public Entity? SelectedEntity => SelectedEntities.LastOrDefault();
 
@@ -40,17 +42,15 @@ public class CadCanvas : FrameworkElement
     private DraftingAssistant _assistant = new();
     private SnapResult _currentSnap = new() { Type = SnapType.None };
     private CadTool _activeTool;
-    private Layer _activeLayer;
+    private Layer? _activeLayer;
     private CadToolType _currentToolType = CadToolType.Select; // Le type (Enum)
 
     //public CadTool ActiveTool => _activeTool;
 
     // Dictionnaire pour stocker les outils disponibles
     private Dictionary<CadToolType, CadTool> _tools;
-
     public Color CurrentDrawingColor { get; set; } = Colors.Black;
-    public double CurrentThickness { get; set; } = 1.0;
-
+    public double CurrentThickness { get; set; } = 0.5;
     public bool IsBoxSelecting { get; set; } = false;
     public Vector2 BoxStartWorld { get; set; }
     public Vector2 BoxEndWorld { get; set; }
@@ -95,12 +95,13 @@ public class CadCanvas : FrameworkElement
             { CadToolType.Circle_3P, new Circle3PTool(this) },
             { CadToolType.Arc_cp, new ArcTool(this) },
             //{ CadToolType.Arc_3P, new Arc3PTool(this) }
+            { CadToolType.Rectangle, new RectangleTool(this) }
         };
 
         _activeTool = _tools[CadToolType.Select];
         _currentToolType = CadToolType.Select;
     }
-
+    
     #region INTERFACE POUR LES OUTILS
 
     // Méthode appelée par MainWindow pour changer d'outil
@@ -138,7 +139,7 @@ public class CadCanvas : FrameworkElement
         IsDrawing = true;
         IsEditing = false;
         TempStartPoint = pos;
-        PreviewLine = new LineEntity(pos, pos, Colors.Gray, CurrentThickness) { DashStyle = DashStyles.Dash };
+        PreviewLine = new LineEntity(pos, pos, Colors.Gray, ActiveLayer.Thickness) { DashStyle = DashStyles.Dash };
         DrawingStarted?.Invoke(this, EventArgs.Empty);
 
     }
@@ -147,7 +148,10 @@ public class CadCanvas : FrameworkElement
     {
         IsDrawing = false;
         IsEditing = true;
-        var finalLine = new LineEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness) { LayerName = ActiveLayer.Name };
+        var finalLine = new LineEntity(TempStartPoint, pos, ActiveLayer.Color, ActiveLayer.Thickness) 
+        { 
+            LayerName = ActiveLayer.Name 
+        };
         Entities.Add(finalLine);
         SelectedEntities.Add(finalLine);
         PreviewLine = null;
@@ -165,7 +169,7 @@ public class CadCanvas : FrameworkElement
         { 
             radius = Vector2.Distance(TempStartPoint, pos);
             // Création de l'entité finale
-            finalCircle = new CircleEntity(TempStartPoint, radius, CurrentDrawingColor, CurrentThickness)
+            finalCircle = new CircleEntity(TempStartPoint, radius, ActiveLayer.Color, ActiveLayer.Thickness)
             {
                 Pt1 = pos,
                 LayerName = ActiveLayer.Name
@@ -177,7 +181,7 @@ public class CadCanvas : FrameworkElement
 
             radius = Vector2.Distance(TempStartPoint, pos)/2;
             // Création de l'entité finale
-            finalCircle = new CircleEntity(TempStartPoint, radius, CurrentDrawingColor, CurrentThickness)
+            finalCircle = new CircleEntity(TempStartPoint, radius, ActiveLayer.Color, ActiveLayer.Thickness)
             {
                 Center = (TempStartPoint + pos) / 2,
                 Pt1 = TempStartPoint,
@@ -189,7 +193,7 @@ public class CadCanvas : FrameworkElement
         {
             radius = Vector2.Distance(TempStartPoint, pos);
             // Création de l'entité finale
-            finalCircle = new CircleEntity(TempStartPoint, radius, CurrentDrawingColor, CurrentThickness)
+            finalCircle = new CircleEntity(TempStartPoint, radius, ActiveLayer.Color, ActiveLayer.Thickness)
             {
                 Pt1 = TempStartPoint,
                 Pt2 = pos,
@@ -205,6 +209,23 @@ public class CadCanvas : FrameworkElement
         PreviewCircle = null;
 
         // On prévient la MainWindow que le dessin est fini
+        DrawingFinished?.Invoke(this, EventArgs.Empty);
+    }
+    // 
+    public void FinishRectangleAction(Vector2 pos)
+    {
+        IsDrawing = false;
+        IsEditing = true;
+
+        // Création de l'entité finale avec les attributs du calque actif
+        var finalRect = new RectangleEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness);
+        finalRect.LayerName = ActiveLayer.Name;
+
+        Entities.Add(finalRect);
+        SetSingleSelection(finalRect);
+
+        PreviewRectangle = null;
+
         DrawingFinished?.Invoke(this, EventArgs.Empty);
     }
     // Méthode pour gérer la sélection d'entités
@@ -236,6 +257,15 @@ public class CadCanvas : FrameworkElement
             // CAS ARC
             else if (Entities[i] is ArcEntity arc && Math.Abs(Vector2.Distance(mousePos, arc.Center) - arc.Radius) < threshold && arc.IsPointOnArc(mousePos, threshold))
             { found = arc; break; }
+            // CAS RECTANGLE
+            else if (entity is RectangleEntity rect)
+            {
+                if (rect.IsPointOnEdges(mousePos, threshold))
+                {
+                    found = rect;
+                    break;
+                }
+            }
         }
 
         // 2. Gérer la logique SHIFT
@@ -354,18 +384,11 @@ public class CadCanvas : FrameworkElement
             }
         }
 
-        //foreach (var entity in Entities)
-        //{
-        //    // On vérifie si cette entité est dans la liste des sélectionnés
-        //    bool isSelected = SelectedEntities.Contains(entity);
-
-        //    // On passe l'info à la méthode Draw
-        //    entity.Draw(dc, WorldToScreen, isSelected);
-        //}
 
         PreviewLine?.Draw(dc, WorldToScreen, false);
         PreviewCircle?.Draw(dc, WorldToScreen, false);
         PreviewArc?.Draw(dc, WorldToScreen, false);
+        PreviewRectangle?.Draw(dc, WorldToScreen, false);
 
         // Dessin des poignées si sélection
         foreach (var sel in SelectedEntities)
@@ -424,6 +447,14 @@ public class CadCanvas : FrameworkElement
             DrawHandle(dc, a.Center);
             DrawHandle(dc, a.StartPoint);
             DrawHandle(dc, a.EndPoint);
+        }
+        else if (entity is RectangleEntity r)
+        {
+            // Dessine les poignées aux 4 coins
+            DrawHandle(dc, new Vector2(r.Left, r.Top));
+            DrawHandle(dc, new Vector2(r.Right, r.Top));
+            DrawHandle(dc, new Vector2(r.Left, r.Bottom));
+            DrawHandle(dc, new Vector2(r.Right, r.Bottom));
         }
         else if (entity is GroupEntity g)
         {
@@ -632,6 +663,8 @@ public class CadCanvas : FrameworkElement
             SelectAll();
             e.Handled = true; // On indique que l'événement est traité
         }
+
+
         // --- TOUCHE SHIFT : Mettre à jour le statut ---
         if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
         {
@@ -721,6 +754,11 @@ public class CadCanvas : FrameworkElement
                 // Note : Si tu veux être ultra-rigoureux, tu pourrais calculer la Bounding Box 
                 // réelle de l'arc, mais tester les 3 points de contrôle suffit dans 99% des cas.
             }
+            else if (entity is RectangleEntity rectangle)
+            {
+                isInside = IsPointInBox(rectangle.P1, minX, maxX, minY, maxY) &&
+                           IsPointInBox(rectangle.P2, minX, maxX, minY, maxY);
+            }
 
             if (isInside && !SelectedEntities.Contains(entity))
                 SelectedEntities.Add(entity);
@@ -780,37 +818,8 @@ public class CadCanvas : FrameworkElement
     {
         new Layer { Name = "Calque 1", Color = Colors.Black }
     };
-    //public void AddLayer(Layer layer)
-    //{
-    //    layer.Renamed += OnLayerRenamed;
-    //    Layers.Add(layer);
-    //}
 
-    //private void OnLayerRenamed(object? sender, (string OldName, string NewName) e)
-    //{
-    //    // Rigueur CAD : On parcourt TOUTES les entités pour mettre à jour leur référence
-    //    foreach (var entity in Entities)
-    //    {
-    //        UpdateEntityLayerName(entity, e.OldName, e.NewName);
-    //    }
-    //}
 
-    //// Méthode récursive pour gérer aussi les groupes
-    //private void UpdateEntityLayerName(Entity entity, string oldName, string newName)
-    //{
-    //    if (entity.LayerName == oldName)
-    //    {
-    //        entity.LayerName = newName;
-    //    }
-
-    //    if (entity is GroupEntity group)
-    //    {
-    //        foreach (var child in group.Children)
-    //        {
-    //            UpdateEntityLayerName(child, oldName, newName);
-    //        }
-    //    }
-    //}
     public Layer ActiveLayer
     {
         get => _activeLayer;
@@ -834,11 +843,13 @@ public class CadCanvas : FrameworkElement
     }
     public void AddLayer(Layer layer)
     {
+        if (layer == null) return;
         // 1. On s'abonne à l'événement de renommage pour propager le nom aux entités
         layer.Renamed += OnLayerRenamed;
 
         // 2. On l'ajoute à la collection pour l'UI
         Layers.Add(layer);
+        OnPropertyChanged(nameof(ActiveLayer));
     }
 
     // Rappel de la méthode de propagation (déjà vue ensemble)
@@ -858,6 +869,15 @@ public class CadCanvas : FrameworkElement
         {
             foreach (var child in group.Children) UpdateEntityLayerName(child, oldName, newName);
         }
+    }
+    public void ResetLayers()
+    {
+        // Désabonnement pour éviter les fuites mémoire
+        foreach (var l in Layers) l.Renamed -= OnLayerRenamed;
+
+        Layers.Clear();
+        _activeLayer = null!; // On force la remise à zéro du champ privé
+        OnPropertyChanged(nameof(ActiveLayer));
     }
     #endregion
 

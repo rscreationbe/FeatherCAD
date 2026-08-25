@@ -4,6 +4,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using FeatherCAD.Models;
 using FeatherCAD.Controls;
+using FeatherCAD.Logic;
 
 namespace FeatherCAD.Tools
 {
@@ -42,7 +43,7 @@ namespace FeatherCAD.Tools
                 Vector2 dir = Vector2.Normalize(worldPos - _center);
                 Vector2 finalEnd = _center + dir * radius;
 
-                var arc = new ArcEntity(_center, _startPoint, finalEnd, Canvas.CurrentDrawingColor, Canvas.CurrentThickness)
+                var arc = new ArcEntity(_center, _startPoint, finalEnd, Canvas.ActiveLayer.Color, Canvas.ActiveLayer.Thickness)
                 {
                     LayerName = Canvas.ActiveLayer.Name
                 };

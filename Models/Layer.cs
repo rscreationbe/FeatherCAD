@@ -11,12 +11,9 @@ namespace FeatherCAD.Models
         private bool _isLocked = false;
         private bool _isActiveLayer;
         private Color _color = Colors.Black;
+        private double  _thickness = 0.5;
+        private DashStyle _dashStyle = DashStyles.Solid;
 
-        //public string Name
-        //{
-        //    get => _name;
-        //    set { _name = value; OnPropertyChanged(); }
-        //}
 
         public bool IsVisible
         {
@@ -35,6 +32,23 @@ namespace FeatherCAD.Models
             get => _color;
             set { _color = value; OnPropertyChanged(); }
         }
+
+        public double Thickness
+        {
+            get => _thickness;
+            set
+            {
+                if (Math.Abs(_thickness - value) < 0.0001) return; // Évite les boucles infinies
+                _thickness = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public DashStyle DashStyle
+        {
+            get { return _dashStyle; }
+            set { _dashStyle = value; OnPropertyChanged(); }
+        } 
 
         public bool IsActiveLayer
         {

@@ -17,6 +17,8 @@
     <None Remove="Images\Circle_cp.png" />
     <None Remove="Images\line.png" />
     <None Remove="Images\linebrisee.png" />
+    <None Remove="Images\PolygonInsc.png" />
+    <None Remove="Images\Rectangle.png" />
     <None Remove="Images\select.png" />
   </ItemGroup>
 
@@ -33,6 +35,8 @@
     <Resource Include="Images\line.png" />
     <Resource Include="Images\linebrisee.png" />
     <Resource Include="Images\plume.ico" />
+    <Resource Include="Images\PolygonInsc.png" />
+    <Resource Include="Images\Rectangle.png" />
     <Resource Include="Images\select.png" />
   </ItemGroup>
 

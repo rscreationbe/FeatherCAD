@@ -35,9 +35,6 @@ namespace FeatherCAD.Models
             // Si sélectionné, on force le Bleu, sinon on prend la couleur de l'entité
             Color drawColor = isSelected ? Colors.Red : this.Color;
 
-            // Si sélectionné, on peut aussi épaissir un peu le trait
-            //double thickness = isSelected ? this.Thickness + 1 : this.Thickness;
-
             Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
             if (DashStyle != null) pen.DashStyle = DashStyle;
 

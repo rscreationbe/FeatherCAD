@@ -84,6 +84,14 @@
                             <models:SubToolItem Icon="/Images/Arc_3Points.png" Tag="Arc_3P" ToolTip="Arc avec 3 points"/>
                         </controls:FlyoutButton.SubItems>
                     </controls:FlyoutButton>
+
+                    <!-- RECTANGLE -->
+                    <controls:FlyoutButton MainIcon="/Images/Rectangle.png" MainTag="Rectangle" ToolSelected="OnToolSelected">
+                        <controls:FlyoutButton.SubItems>
+                            <models:SubToolItem Icon="/Images/Rectangle.png" Tag="Rectangle" ToolTip="Rectangle entre 2 points"/>
+                            <models:SubToolItem Icon="/Images/PolygonInsc.png" Tag="PolygoneInsc" ToolTip="Polygone inscrit"/>
+                        </controls:FlyoutButton.SubItems>
+                    </controls:FlyoutButton>
                 </StackPanel>
             </Border>
             
@@ -107,7 +115,7 @@
                           VerticalContentAlignment="Center"
                           ItemsSource="{Binding Layers, ElementName=MyViewport}" 
                           SelectedItem="{Binding ActiveLayer, ElementName=MyViewport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-
+                    <!--, ValidatesOnExceptions=True-->
                     <!-- L'ItemTemplate remplace DisplayMemberPath -->
                     <ComboBox.ItemTemplate>
                         <DataTemplate>

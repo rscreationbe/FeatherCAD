@@ -39,7 +39,7 @@ namespace FeatherCAD.Controls
             // Initialisation d'une liste PROPRE à cette instance
             SubItems = new List<SubToolItem>();
 
-            _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
             _timer.Tick += Timer_Tick;
         }
 

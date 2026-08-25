@@ -17,7 +17,8 @@ public enum CadToolType
     Circle_2P,
     Circle_3P,
     Arc_cp,
-    Arc_3P
+    Arc_3P,
+    Rectangle
 }
 // Un élément de sous-outil, utilisé pour représenter un outil dans l'interface utilisateur
 public class SubToolItem

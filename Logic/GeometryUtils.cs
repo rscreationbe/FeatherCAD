@@ -1,5 +1,6 @@
-﻿using System.Numerics;
-using FeatherCAD.Models;
+﻿using FeatherCAD.Models;
+using System.Numerics;
+using System.Windows.Media;
 
 public static class GeometryUtils
 {
@@ -46,7 +47,29 @@ public static class GeometryUtils
                 if (valid) points.Add(p);
             }
         }
+        else if (e1 is RectangleEntity rect || e2 is RectangleEntity rect2)
+        {
+            // On décompose le rectangle en 4 lignes temporaires pour calculer les intersections
+            RectangleEntity r = (e1 is RectangleEntity) ? (RectangleEntity)e1 : (RectangleEntity)e2;
+            Entity other = (e1 is RectangleEntity) ? e2 : e1;
 
+            Vector2 tl = new Vector2(r.Left, r.Top);
+            Vector2 tr = new Vector2(r.Right, r.Top);
+            Vector2 bl = new Vector2(r.Left, r.Bottom);
+            Vector2 br = new Vector2(r.Right, r.Bottom);
+
+            LineEntity[] edges = {
+                new LineEntity(tl, tr, Colors.Black, 1),
+                new LineEntity(tr, br, Colors.Black, 1),
+                new LineEntity(br, bl, Colors.Black, 1),
+                new LineEntity(bl, tl, Colors.Black, 1)
+            };
+
+            foreach (var edge in edges)
+            {
+                points.AddRange(GetEntitiesIntersections(edge, other));
+            }
+        }
         return points;
     }
     // Calcule l'intersection de deux segments de ligne AB et CD

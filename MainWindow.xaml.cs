@@ -165,10 +165,34 @@ public partial class MainWindow : Window
                         }
                     }
                 }
+                // --- CAS DU RECTANGLE ---
+                else if (MyViewport.SelectedEntity is RectangleEntity rect)
+                {
+                    if (tag == "DX")
+                    {
+                        rect.P2 = new Vector2(rect.P1.X + val, rect.P2.Y);
+                    }
+                    else if (tag == "DY")
+                    {
+                        rect.P2 = new Vector2(rect.P2.X, rect.P1.Y + val);
+                    }
+                }
 
                 MyViewport.InvalidateVisual();
                 MyViewport.Focus(); // Rend le focus au canvas pour continuer
             }
+        }
+
+
+    }
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        // --- TOUCHE CTRL+L : Ouvrir la fenêtre des calques ---
+        if (e.Key == Key.L && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            OpenLayer();
+            e.Handled = true; // On indique que l'événement est traité
         }
     }
 
@@ -214,13 +238,20 @@ public partial class MainWindow : Window
 
     private void MenuNew_Click(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show("Voulez-vous créer un nouveau dessin ?\nTout le travail non enregistré sera perdu.",
-            "Nouveau", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+        if (MessageBox.Show("Tout le travail non enregistré sera perdu.", "Nouveau", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
         {
-            MyViewport.Entities.Clear();
             MyViewport.DeselectAll();
+            MyViewport.StopDrawing();
+            MyViewport.ResetLayers();
+            MyViewport.Entities.Clear();
+
+            // On recrée au moins un calque par défaut
+            MyViewport.AddLayer(new Layer { Name = "Calque 1", Color = Colors.Black, IsActiveLayer = true });
+            MyViewport.ActiveLayer = MyViewport.Layers[0];
+
             MyViewport.InvalidateVisual();
         }
+
     }
 
     private void MenuExit_Click(object sender, RoutedEventArgs e)
@@ -307,6 +338,7 @@ public partial class MainWindow : Window
             {
                 entity.Thickness = weight/10;
             }
+            MyViewport.ActiveLayer.Thickness = weight/10;
             MyViewport.InvalidateVisual();
         }
     }
@@ -321,6 +353,7 @@ public partial class MainWindow : Window
         // 1. RIGUEUR : On stoppe toute action en cours avant de vider les listes
         MyViewport.DeselectAll();
         MyViewport.StopDrawing();
+        MyViewport.ResetLayers();
 
         // 2. CHARGEMENT DES CALQUES
         MyViewport.Layers.Clear();
@@ -357,7 +390,8 @@ public partial class MainWindow : Window
 
             // Optionnel : Mettre à jour le titre de la fenêtre avec le nom du fichier
             // this.Title = $"FeatherCAD - {loadedProject.ProjectName}";
-        }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }), System.Windows.Threading.DispatcherPriority.Loaded);
+        UpdateLayerComboBox();
     }
     private void MenuSave_Click(object sender, RoutedEventArgs e)
     {
@@ -443,8 +477,19 @@ public partial class MainWindow : Window
 
     private void MenuLayers_Click(object sender, RoutedEventArgs e)
     {
+        OpenLayer();
+    }
+    public void OpenLayer()
+    {
         LayersWindow win = new LayersWindow(MyViewport);
         win.Owner = this;
         win.Show(); // On utilise Show pour pouvoir dessiner tout en gardant la fenêtre ouverte
+    }
+    public void UpdateLayerComboBox()
+    {
+        // On met à jour la ComboBox avec les calques actuels
+        ComboLayers.ItemsSource = MyViewport.Layers;
+        //ComboLayers.DisplayMemberPath = "Name";
+        ComboLayers.SelectedItem = MyViewport.ActiveLayer;
     }
 }

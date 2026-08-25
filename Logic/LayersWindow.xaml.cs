@@ -2,31 +2,29 @@
 using FeatherCAD.Models;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace FeatherCAD
 {
     public partial class LayersWindow : Window
     {
         private CadCanvas _canvas;
-
+        // Constructeur
         public LayersWindow(CadCanvas canvas)
         {
             InitializeComponent();
             _canvas = canvas;
             LayersGrid.ItemsSource = _canvas.Layers;
         }
-
+        // Méthode bouton ajouter un calque
         private void AddLayer_Click(object sender, RoutedEventArgs e)
         {
             // On crée l'objet
             var newLayer = new Layer
             {
                 Name = $"Calque {_canvas.Layers.Count + 1}",
-                Color = System.Windows.Media.Colors.Black // Couleur par défaut
             };
 
-            // RIGOUREUX : On utilise une méthode du Canvas pour l'ajouter 
-            // afin qu'il puisse s'abonner aux événements du calque.
             _canvas.AddLayer(newLayer);
         }
 
@@ -45,7 +43,7 @@ namespace FeatherCAD
                 }
             }
         }
-
+        // Méthode 
         private void ActivateLayer_Click(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton rb && rb.DataContext is Layer selectedLayer)
