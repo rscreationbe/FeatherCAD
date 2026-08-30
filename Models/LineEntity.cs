@@ -31,12 +31,12 @@ namespace FeatherCAD.Models
         {
             Point p1 = worldToScreen(Start);
             Point p2 = worldToScreen(End);
-
+            
             // Si sélectionné, on force le Bleu, sinon on prend la couleur de l'entité
             Color drawColor = isSelected ? Colors.Red : this.Color;
 
             Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
-            if (DashStyle != null) pen.DashStyle = DashStyle;
+            if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
 
             pen.Freeze();
             dc.DrawLine(pen, p1, p2);

@@ -65,6 +65,7 @@ public class CircleEntity : Entity
         //double thickness = isSelected ? this.Thickness + 1 : this.Thickness;
 
         Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
+        if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
         pen.Freeze();
 
         dc.DrawEllipse(null, pen, screenCenter, screenRadius, screenRadius);

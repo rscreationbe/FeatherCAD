@@ -12,6 +12,9 @@ public abstract class Entity
     public double Thickness { get; set; } = 0.5;
     public DashStyle? DashStyle { get; set; } = null;
     public string LayerName { get; set; } = "Calque 1";
+    public LinePattern Pattern { get; set; } = LinePattern.Solid;
+
+
 
     // méthode abstraite pour déplacer l'entité, à implémenter dans les sous-classes
     public abstract void Move(Vector2 delta);

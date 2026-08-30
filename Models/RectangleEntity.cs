@@ -41,7 +41,7 @@ namespace FeatherCAD.Models
             // Définition de l'apparence (Sélection = Red)
             Color drawColor = isSelected ? Colors.Red : Color;
             Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
-            if (DashStyle != null) pen.DashStyle = DashStyle;
+            if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
             pen.Freeze();
 
             // Dessin (fond null pour n'avoir que le contour)

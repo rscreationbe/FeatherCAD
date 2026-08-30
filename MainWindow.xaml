@@ -31,7 +31,7 @@
                 </MenuItem>
                 <MenuItem Header="_Tracé">
                     <MenuItem Header="_Couleur" InputGestureText="Ctrl+1" Click="MenuColorPicker_Click"/>
-                    <MenuItem Header="_Motif" IsCheckable="True" />
+                    <MenuItem x:Name="MenuMotif" Header="_Motif" IsCheckable="True" Click="MenuMotif_Click"/>
                     <MenuItem Header="_Poids" x:Name="MenuPoids">
                         <MenuItem Header="Très fin (0.5)" Tag="0.5" Click="MenuWeight_Click" IsCheckable="True"/>
                         <MenuItem Header="Normal (1.0)" Tag="1.0" Click="MenuWeight_Click" IsCheckable="True" IsChecked="True"/>

@@ -1,0 +1,44 @@
+﻿<Window x:Class="FeatherCAD.Controls.PatternEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Création de Motif de Trait" Height="300" Width="450"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#F3F3F3">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Nom -->
+        <StackPanel Margin="0,0,0,15">
+            <TextBlock Text="Nom du motif :" FontWeight="Bold" Margin="0,0,0,5"/>
+            <TextBox x:Name="TxtName" Padding="5" Text="Mon Motif"/>
+        </StackPanel>
+
+        <!-- Séquence -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Séquence (ex: 10, 2, 2, 2) :" FontWeight="Bold" Margin="0,0,0,5"/>
+            <TextBox x:Name="TxtSequence" Padding="5" Text="10, 2, 2, 2" TextChanged="TxtSequence_TextChanged"/>
+            <TextBlock Text="Format : Trait, Espace, Trait, Espace..." FontSize="10" Foreground="Gray" Margin="2,2,0,0"/>
+        </StackPanel>
+
+        <!-- Aperçu -->
+        <GroupBox Grid.Row="3" Header="Aperçu" Margin="0,10">
+            <Canvas x:Name="PreviewArea" Background="White" Margin="5">
+                <Line x:Name="PreviewLine" X1="10" Y1="30" X2="380" Y2="30" 
+                      Stroke="Black" StrokeThickness="2"/>
+            </Canvas>
+        </GroupBox>
+
+        <!-- Actions -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Annuler" Width="80" IsCancel="True" Margin="0,0,10,0" Padding="5"/>
+            <Button Content="Ajouter" Width="100" Click="Add_Click" Style="{StaticResource {x:Static ToolBar.ButtonStyleKey}}" 
+                    Background="#007ACC" Foreground="White" Padding="5"/>
+        </StackPanel>
+    </Grid>
+</Window>

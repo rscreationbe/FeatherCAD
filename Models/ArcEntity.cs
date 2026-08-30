@@ -57,7 +57,7 @@ namespace FeatherCAD.Models
 
             Color drawColor = isSelected ? Colors.Red : Color;
             Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
-            if (DashStyle != null) pen.DashStyle = DashStyle;
+            if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
             pen.Freeze();
 
             dc.DrawGeometry(null, pen, geometry);

@@ -273,6 +273,40 @@ public partial class MainWindow : Window
         }
     }
 
+    private void PopulatePatternMenu()
+    {
+        if (MenuMotif == null) return;
+        MenuMotif.Items.Clear();
+
+        foreach (var pattern in LinePatternManager.Patterns)
+        {
+            // Maintenant pattern.DisplayPattern est reconnu !
+            var mi = new MenuItem
+            {
+                Header = $"{pattern.Name} ({pattern.DisplayPattern})",
+                Tag = pattern
+            };
+
+            mi.Click += (s, e) =>
+            {
+                var p = (LinePattern)((MenuItem)s).Tag;
+
+                // On l'applique au calque actif
+                if (MyViewport.ActiveLayer != null)
+                    MyViewport.ActiveLayer.DashStyle = p.WpfDashStyle; // Attention ici !
+
+                // On l'applique à la sélection
+                foreach (var ent in MyViewport.SelectedEntities)
+                {
+                    ent.Pattern = p;
+                }
+
+                MyViewport.InvalidateVisual();
+            };
+            MenuMotif.Items.Add(mi);
+        }
+    }
+
     // --- MENU VUE ---
 
     private void MenuZoomAll_Click(object sender, RoutedEventArgs e)
@@ -491,5 +525,29 @@ public partial class MainWindow : Window
         ComboLayers.ItemsSource = MyViewport.Layers;
         //ComboLayers.DisplayMemberPath = "Name";
         ComboLayers.SelectedItem = MyViewport.ActiveLayer;
+    }
+
+    private void MenuMotif_Click(object sender, RoutedEventArgs e)
+    {
+
+    }
+    private void MenuCustomPattern_Click(object sender, RoutedEventArgs e)
+    {
+        var editor = new PatternEditorWindow();
+        editor.Owner = this;
+        if (editor.ShowDialog() == true && editor.CreatedPattern != null)
+        {
+            LinePatternManager.AddPattern(editor.CreatedPattern);
+
+            // Appliquer immédiatement au calque actif (Inspiration Graphite)
+            MyViewport.ActiveLayer.LinePattern = editor.CreatedPattern;
+
+            // Appliquer à la sélection s'il y en a une
+            foreach (var entity in MyViewport.SelectedEntities)
+            {
+                entity.Pattern = editor.CreatedPattern;
+            }
+            MyViewport.InvalidateVisual();
+        }
     }
 }
