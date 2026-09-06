@@ -1,6 +1,7 @@
 ﻿using System.Windows.Media; // Pour la couleur
 using System.Numerics;      // Pour Vector2 (nécessite .NET 6+)
 using System.Windows;       // Pour le type Point de WPF
+using FeatherCAD.Logic;
 
 namespace FeatherCAD.Models;
 
@@ -10,9 +11,11 @@ public abstract class Entity
 {
     public Color Color { get; set; } = Colors.Black;
     public double Thickness { get; set; } = 0.5;
-    public DashStyle? DashStyle { get; set; } = null;
+    //public DashStyle? DashStyle { get; set; } = null;
     public string LayerName { get; set; } = "Calque 1";
-    public LinePattern Pattern { get; set; } = LinePattern.Solid;
+    // Pattern est un objet de type LinePattern qui représente le motif de ligne de l'entité.
+    public LinePattern Pattern { get; set; } = LinePatternManager.Patterns.First();
+
 
 
 

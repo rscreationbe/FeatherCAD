@@ -9,49 +9,35 @@ namespace FeatherCAD.Models
     {
         public string Name { get; set; } = "Plein";
 
-        // La séquence : [longueur trait, longueur espace, longueur trait, longueur espace...]
-        public List<double> Dashes { get; set; } = new List<double>();
+        // Liste brute des longueurs [trait, espace, trait, espace...]
+        public List<double> Dashes { get; set; } = new();
 
         public LinePattern() { }
 
-        public LinePattern(string name, params double[] dashes)
+        // Constructeur polyvalent (accepte tableaux ou listes)
+        public LinePattern(string name, IEnumerable<double> dashes)
         {
             Name = name;
-            Dashes = dashes.ToList();
+            Dashes = dashes?.ToList() ?? new List<double>();
         }
 
-        // --- LA PROPRIÉTÉ MANQUANTE POUR VOTRE ERREUR ---
+        // Pour l'affichage dans les menus (ex: "Axe — . —")
         [JsonIgnore]
-        public string DisplayPattern
-        {
-            get
-            {
-                if (Dashes == null || Dashes.Count == 0) return "────────";
+        public string DisplayPattern => Dashes.Count == 0 ? "────────" :
+            string.Join("", Dashes.Select((d, i) => i % 2 == 0 ? "—" : "·"));
 
-                // On transforme la liste [10, 2, 2, 2] en une chaîne de symboles visuels
-                // On limite à quelques répétitions pour ne pas surcharger le menu
-                return string.Join(" ", Dashes.Select((d, i) => i % 2 == 0 ? "—" : "·"));
-            }
-        }
-
+        // Conversion sécurisée pour WPF
         [JsonIgnore]
         public DashStyle WpfDashStyle
         {
             get
             {
                 if (Dashes == null || Dashes.Count == 0) return DashStyles.Solid;
-                // DoubleCollection convertit notre List<double> pour WPF
+                // DoubleCollection est nécessaire pour DashStyle
                 var ds = new DashStyle(new DoubleCollection(Dashes), 0);
                 ds.Freeze();
                 return ds;
             }
         }
-
-        // --- MOTIFS STANDARDS (Statiques pour un accès facile) ---
-        public static LinePattern Solid => new LinePattern("Plein");
-        public static LinePattern Dashed => new LinePattern("Pointillé", 4, 2);
-        public static LinePattern Dotted => new LinePattern("Points", 1, 2);
-        public static LinePattern Axis => new LinePattern("Axe", 10, 2, 2, 2);
-        public static LinePattern Phantom => new LinePattern("Fantôme", 10, 2, 2, 2, 2, 2);
     }
 }

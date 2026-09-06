@@ -95,12 +95,51 @@ namespace FeatherCAD.Tools
         // Méthode d'aide pour savoir si la souris touche une entité spécifique
         private bool IsEntityHit(Entity entity, Vector2 pos, float threshold)
         {
-            if (entity is LineEntity l) return GeometryUtils.IsPointNearLine(pos, l.Start, l.End, threshold);
-            if (entity is CircleEntity c) return Math.Abs(Vector2.Distance(pos, c.Center) - c.Radius) < threshold;
-            if (entity is ArcEntity a) return Math.Abs(Vector2.Distance(pos, a.Center) - a.Radius) < threshold && a.IsPointOnArc(pos, threshold);
-            if (entity is GroupEntity g) return g.IsPointInside(pos, threshold);
+            //if (entity is LineEntity l) return GeometryUtils.IsPointNearLine(pos, l.Start, l.End, threshold);
+            //if (entity is CircleEntity c) return Math.Abs(Vector2.Distance(pos, c.Center) - c.Radius) < threshold;
+            //if (entity is ArcEntity a) return Math.Abs(Vector2.Distance(pos, a.Center) - a.Radius) < threshold && a.IsPointOnArc(pos, threshold);
+            //if (entity is GroupEntity g) return g.IsPointInside(pos, threshold);
+            //return false;
+
+            // --- CAS DE LA LIGNE ---
+            if (entity is Models.LineEntity l)
+                return GeometryUtils.IsPointNearLine(pos, l.Start, l.End, threshold);
+
+            // --- CAS DU CERCLE ---
+            if (entity is Models.CircleEntity c)
+            {
+                // 1. Détection sur la circonférence (bord)
+                bool onEdge = Math.Abs(Vector2.Distance(pos, c.Center) - c.Radius) < threshold;
+
+                // 2. Détection sur le CENTRE (poignée centrale)
+                bool onCenter = Vector2.Distance(pos, c.Center) < threshold;
+
+                return onEdge || onCenter;
+            }
+
+            // --- CAS DE L'ARC ---
+            if (entity is Models.ArcEntity a)
+            {
+                // 1. Détection sur la courbe
+                bool onEdge = Math.Abs(Vector2.Distance(pos, a.Center) - a.Radius) < threshold && a.IsPointOnArc(pos, threshold);
+
+                // 2. Détection sur le CENTRE
+                bool onCenter = Vector2.Distance(pos, a.Center) < threshold;
+
+                return onEdge || onCenter;
+            }
+
+            // --- CAS DU RECTANGLE ---
+            if (entity is Models.RectangleEntity r)
+                return r.IsPointOnEdges(pos, threshold);
+
+            // --- CAS DU GROUPE ---
+            if (entity is Models.GroupEntity g)
+                return g.IsPointInside(pos, threshold);
+
             return false;
         }
+
         // 6. On fournit des instructions à l'utilisateur
         public override string GetInstruction()
         {

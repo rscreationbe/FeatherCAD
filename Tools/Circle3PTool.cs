@@ -23,7 +23,7 @@ namespace FeatherCAD.Tools
                 _step = 1;
                 Canvas.StartDrawingAction(worldPos);
                 // On utilise PreviewLine pour montrer le segment P1 -> Souris
-                Canvas.PreviewLine = new LineEntity(_p1, worldPos, Colors.Gray, 0.5) { DashStyle = DashStyles.Dash };
+                Canvas.PreviewLine = new LineEntity(_p1, worldPos, Colors.Gray, 0.5) { Pattern = Canvas.ActiveLayer.LinePattern };
             }
             else if (_step == 1) // Deuxième clic
             {
@@ -31,15 +31,18 @@ namespace FeatherCAD.Tools
                 _step = 2;
                 Canvas.PreviewLine = null; // On enlève la ligne
                 // On initialise le cercle de prévisualisation
-                Canvas.PreviewCircle = new CircleEntity(_p1, 0, Colors.Gray, 0.5) { DashStyle = DashStyles.Dash };
+                Canvas.PreviewCircle = new CircleEntity(_p1, 0, Colors.Gray, 0.5) { Pattern = Canvas.ActiveLayer.LinePattern };
             }
             else if (_step == 2) // Troisième clic
             {
                 if (GeometryUtils.CalculateCircle3P(_p1, _p2, worldPos, out Vector2 center, out float radius))
                 {
                     _p3 = worldPos;
-                    var finalCircle = new CircleEntity(center, radius, Canvas.CurrentDrawingColor, Canvas.CurrentThickness);
-                    
+                    var finalCircle = new CircleEntity(center, radius, Canvas.CurrentDrawingColor, Canvas.CurrentThickness)
+                    {
+                        Pattern = Canvas.ActiveLayer.LinePattern
+                    };
+
                     finalCircle.Pt1 = _p1;
                     finalCircle.Pt2 = _p2;
                     finalCircle.Pt3 = _p3; // On stocke le troisième point pour référence

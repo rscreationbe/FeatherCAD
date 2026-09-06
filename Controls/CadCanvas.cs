@@ -139,7 +139,11 @@ public class CadCanvas : FrameworkElement
         IsDrawing = true;
         IsEditing = false;
         TempStartPoint = pos;
-        PreviewLine = new LineEntity(pos, pos, Colors.Gray, ActiveLayer.Thickness) { DashStyle = DashStyles.Dash };
+        PreviewLine = new LineEntity(pos, pos, Colors.Gray, ActiveLayer.Thickness) 
+        { 
+            //DashStyle = ActiveLayer.DashStyle,
+            Pattern = ActiveLayer.LinePattern
+        };
         DrawingStarted?.Invoke(this, EventArgs.Empty);
 
     }
@@ -150,7 +154,8 @@ public class CadCanvas : FrameworkElement
         IsEditing = true;
         var finalLine = new LineEntity(TempStartPoint, pos, ActiveLayer.Color, ActiveLayer.Thickness) 
         { 
-            LayerName = ActiveLayer.Name 
+            LayerName = ActiveLayer.Name,
+            Pattern = ActiveLayer.LinePattern
         };
         Entities.Add(finalLine);
         SelectedEntities.Add(finalLine);
@@ -172,7 +177,8 @@ public class CadCanvas : FrameworkElement
             finalCircle = new CircleEntity(TempStartPoint, radius, ActiveLayer.Color, ActiveLayer.Thickness)
             {
                 Pt1 = pos,
-                LayerName = ActiveLayer.Name
+                LayerName = ActiveLayer.Name,
+                Pattern = ActiveLayer.LinePattern
             };
         }
         if (CurrentTool == CadToolType.Circle_2P)
@@ -186,7 +192,8 @@ public class CadCanvas : FrameworkElement
                 Center = (TempStartPoint + pos) / 2,
                 Pt1 = TempStartPoint,
                 Pt2 = pos,
-                LayerName = ActiveLayer.Name
+                LayerName = ActiveLayer.Name, 
+                Pattern = ActiveLayer.LinePattern
             };
         }
         if (CurrentTool == CadToolType.Circle_3P)
@@ -197,7 +204,8 @@ public class CadCanvas : FrameworkElement
             {
                 Pt1 = TempStartPoint,
                 Pt2 = pos,
-                LayerName = ActiveLayer.Name
+                LayerName = ActiveLayer.Name,
+                Pattern = ActiveLayer.LinePattern
             };
         }
 
@@ -218,8 +226,11 @@ public class CadCanvas : FrameworkElement
         IsEditing = true;
 
         // Création de l'entité finale avec les attributs du calque actif
-        var finalRect = new RectangleEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness);
-        finalRect.LayerName = ActiveLayer.Name;
+        var finalRect = new RectangleEntity(TempStartPoint, pos, CurrentDrawingColor, CurrentThickness)
+        {
+            LayerName = ActiveLayer.Name,
+            Pattern = ActiveLayer.LinePattern
+        };
 
         Entities.Add(finalRect);
         SetSingleSelection(finalRect);
@@ -439,7 +450,9 @@ public class CadCanvas : FrameworkElement
         {
             DrawHandle(dc, c.Center);
             DrawHandle(dc, c.Center + new Vector2(c.Radius, 0));
-            // ... (tes autres points de cercle)
+            DrawHandle(dc, c.Center + new Vector2(-c.Radius, 0));
+            DrawHandle(dc, c.Center + new Vector2(0, c.Radius));
+            DrawHandle(dc, c.Center + new Vector2(0, -c.Radius));
         }
         else if (entity is ArcEntity a)
         {

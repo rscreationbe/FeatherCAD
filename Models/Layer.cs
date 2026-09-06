@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using FeatherCAD.Logic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media;
 
@@ -12,8 +13,8 @@ namespace FeatherCAD.Models
         private bool _isActiveLayer;
         private Color _color = Colors.Black;
         private double  _thickness = 0.5;
-        private DashStyle _dashStyle = DashStyles.Solid;
-        private LinePattern _linePattern = LinePattern.Solid;
+        //private DashStyle _dashStyle = DashStyles.Solid;
+        private LinePattern _linePattern = LinePatternManager.Patterns.First();
         public LinePattern LinePattern
         {
             get => _linePattern;
@@ -50,11 +51,11 @@ namespace FeatherCAD.Models
             }
         }
 
-        public DashStyle DashStyle
-        {
-            get { return _dashStyle; }
-            set { _dashStyle = value; OnPropertyChanged(); }
-        }
+        //public DashStyle DashStyle
+        //{
+        //    get { return _dashStyle; }
+        //    set { _dashStyle = value; OnPropertyChanged(); }
+        //}
 
         public bool IsActiveLayer
         {
@@ -86,8 +87,9 @@ namespace FeatherCAD.Models
 
         // Événement spécifique pour notifier le renommage (AncienNom, NouveauNom)
         public event EventHandler<(string OldName, string NewName)>? Renamed;
-
+        // Implémentation de INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
+        // Méthode pour déclencher l'événement PropertyChanged
         protected void OnPropertyChanged([CallerMemberName] string? name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

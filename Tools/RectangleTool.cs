@@ -28,7 +28,7 @@ namespace FeatherCAD.Tools
                 // Initialiser la prévisualisation
                 Canvas.PreviewRectangle = new RectangleEntity(worldPos, worldPos, Colors.Gray, Canvas.ActiveLayer.Thickness)
                 {
-                    DashStyle = DashStyles.Dash
+                    Pattern = Canvas.ActiveLayer.LinePattern
                 };
             }
             else

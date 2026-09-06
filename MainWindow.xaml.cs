@@ -20,8 +20,10 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        InitializePatternMenu();
 
-        MyViewport.MouseMove += MyViewport_MouseMove;
+
+    MyViewport.MouseMove += MyViewport_MouseMove;
 
         // --- CLIC 1 ---
         MyViewport.DrawingStarted += (s, e) => {
@@ -81,6 +83,12 @@ public partial class MainWindow : Window
         MyViewport.UpdateStatus();
     }
 
+    private void InitializePatternMenu()
+    {
+        PopulatePatternMenu();
+        // On écoute le manager : si un motif est ajouté via l'éditeur, le menu se met à jour
+        LinePatternManager.Patterns.CollectionChanged += (s, e) => PopulatePatternMenu();
+    }
     private void TxtInput_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
@@ -216,12 +224,12 @@ public partial class MainWindow : Window
             // Si on dessine, on suit la souris. Si on édite, on prend la fin de la ligne sélectionnée.
             Vector2 currentEnd = MyViewport.IsDrawing ? mouseWorld : ((LineEntity)MyViewport.SelectedEntity).End ;
 
-            var metrics = MyViewport.GetCurrentMetrics(currentEnd);
+            var (dx, dy, dist, angle) = MyViewport.GetCurrentMetrics(currentEnd);
 
-            TxtDX.Text = metrics.dx.ToString("F2");
-            TxtDY.Text = metrics.dy.ToString("F2");
-            TxtDist.Text = metrics.dist.ToString("F2");
-            TxtAngle.Text = metrics.angle.ToString("F2");
+            TxtDX.Text = dx.ToString("F2");
+            TxtDY.Text = dy.ToString("F2");
+            TxtDist.Text = dist.ToString("F2");
+            TxtAngle.Text = angle.ToString("F2");
         }
 
         if (!MyViewport.IsDrawing && MyViewport.SelectedEntity == null)
@@ -278,33 +286,43 @@ public partial class MainWindow : Window
         if (MenuMotif == null) return;
         MenuMotif.Items.Clear();
 
-        foreach (var pattern in LinePatternManager.Patterns)
+        foreach (var lp in LinePatternManager.Patterns)
         {
-            // Maintenant pattern.DisplayPattern est reconnu !
             var mi = new MenuItem
             {
-                Header = $"{pattern.Name} ({pattern.DisplayPattern})",
-                Tag = pattern
+                Header = $"{lp.Name}  {lp.DisplayPattern}",
+                Tag = lp,
+                IsCheckable = true,
+                IsChecked = (MyViewport.ActiveLayer?.LinePattern?.Name == lp.Name)
             };
 
-            mi.Click += (s, e) =>
-            {
-                var p = (LinePattern)((MenuItem)s).Tag;
+            mi.Click += (s, e) => {
+                var selectedPattern = (LinePattern)((MenuItem)s).Tag;
 
-                // On l'applique au calque actif
-                if (MyViewport.ActiveLayer != null)
-                    MyViewport.ActiveLayer.DashStyle = p.WpfDashStyle; // Attention ici !
+                // 1. Appliquer au calque (pour les futurs dessins)
+                MyViewport.ActiveLayer.LinePattern = selectedPattern;
 
-                // On l'applique à la sélection
-                foreach (var ent in MyViewport.SelectedEntities)
-                {
-                    ent.Pattern = p;
-                }
+                // 2. Appliquer à la sélection actuelle
+                foreach (var ent in MyViewport.SelectedEntities) ent.Pattern = selectedPattern;
 
                 MyViewport.InvalidateVisual();
             };
             MenuMotif.Items.Add(mi);
         }
+
+        MenuMotif.Items.Add(new Separator());
+        var customMi = new MenuItem { Header = "Personnalisé..." };
+        customMi.Click += (s, e) => {
+            var editor = new PatternEditorWindow
+            {
+                Owner = this
+            };
+            if (editor.ShowDialog() == true && editor.CreatedPattern != null)
+            {
+                LinePatternManager.AddPattern(editor.CreatedPattern);
+            }
+        };
+        MenuMotif.Items.Add(customMi);
     }
 
     // --- MENU VUE ---
@@ -329,8 +347,10 @@ public partial class MainWindow : Window
     }
     private void MenuColorPicker_Click(object sender, RoutedEventArgs e)
     {
-        ColorPickerWindow picker = new ColorPickerWindow();
-        picker.Owner = this; // Pour que la fenêtre soit centrée sur l'appli
+        ColorPickerWindow picker = new ColorPickerWindow
+        {
+            Owner = this // Pour que la fenêtre soit centrée sur l'appli
+        };
 
         if (picker.ShowDialog() == true)
         {
@@ -353,7 +373,7 @@ public partial class MainWindow : Window
     }
     private void MenuWeight_Click(object sender, RoutedEventArgs e)
     {
-        var selectedItem = sender as MenuItem;
+        MenuItem? selectedItem = sender as MenuItem;
         if (selectedItem == null) return;
 
         // 1. Récupérer l'épaisseur depuis le Tag
@@ -396,6 +416,13 @@ public partial class MainWindow : Window
             // TRÈS IMPORTANT : Utilisez votre méthode AddLayer(layer)
             // C'est elle qui fait le branchement : layer.Renamed += OnLayerRenamed;
             MyViewport.AddLayer(layer);
+        }
+        foreach (var ent in loadedProject.Entities)
+        {
+            if (ent.Pattern != null && !LinePatternManager.Patterns.Any(p => p.Name == ent.Pattern.Name))
+            {
+                LinePatternManager.AddPattern(ent.Pattern);
+            }
         }
 
         // 3. CHARGEMENT DES ENTITÉS

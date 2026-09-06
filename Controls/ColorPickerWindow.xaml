@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FeatherCAD.Controls"
-        Title="Couleur du tracé" Height="200" Width="200" 
+        Title="Couleur du tracé" Width="200" Height="250"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False">
     <StackPanel Margin="10">
         <TextBlock Text="Sélectionnez une couleur :" Margin="0,0,0,10" FontWeight="Bold"/>
@@ -14,7 +14,7 @@
             <UniformGrid.Resources>
                 <Style TargetType="Button">
                     <Setter Property="Margin" Value="2"/>
-                    <Setter Property="Height" Value="40"/>
+                    <Setter Property="Height" Value="30"/>
                     <EventSetter Event="Click" Handler="ColorButton_Click"/>
                 </Style>
             </UniformGrid.Resources>
@@ -29,6 +29,6 @@
             <Button Background="Gray" Tag="Gray"/>
         </UniformGrid>
 
-        <Button Content="Annuler" Click="Cancel_Click" Margin="0,20,0,0" Height="30"/>
+        <Button Content="Annuler" Click="Cancel_Click" Margin="0,10,0,10" Height="30"/>
     </StackPanel>
 </Window>

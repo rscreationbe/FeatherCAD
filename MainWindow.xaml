@@ -30,13 +30,28 @@
                     <MenuItem Header="_Supprimer" Click="MenuDelete_Click" InputGestureText="Suppr" />
                 </MenuItem>
                 <MenuItem Header="_Tracé">
-                    <MenuItem Header="_Couleur" InputGestureText="Ctrl+1" Click="MenuColorPicker_Click"/>
-                    <MenuItem x:Name="MenuMotif" Header="_Motif" IsCheckable="True" Click="MenuMotif_Click"/>
-                    <MenuItem Header="_Poids" x:Name="MenuPoids">
-                        <MenuItem Header="Très fin (0.5)" Tag="0.5" Click="MenuWeight_Click" IsCheckable="True"/>
-                        <MenuItem Header="Normal (1.0)" Tag="1.0" Click="MenuWeight_Click" IsCheckable="True" IsChecked="True"/>
-                        <MenuItem Header="Épais (2.0)" Tag="2.0" Click="MenuWeight_Click" IsCheckable="True"/>
-                        <MenuItem Header="Très épais (4.0)" Tag="4.0" Click="MenuWeight_Click" IsCheckable="True"/>
+                    <!-- COULEUR -->
+                    <MenuItem Header="_Couleur" Click="MenuColorPicker_Click" InputGestureText="Ctrl+1">
+                        <MenuItem.Icon>
+                            <Rectangle x:Name="RectColorIndicator" Width="12" Height="12" Fill="Black" Stroke="Gray"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+
+                    <!-- MOTIF (Séquence de traits) -->
+                    <MenuItem x:Name="MenuMotif" Header="_Motif" InputGestureText="Ctrl+M">
+                        <!-- Cet item sera vidé et rempli dynamiquement par InitializePatternMenu() -->
+                        <MenuItem Header="Plein" IsCheckable="True" IsChecked="True"/>
+                        <Separator/>
+                        <MenuItem Header="Personnalisé..." Click="MenuCustomPattern_Click"/>
+                    </MenuItem>
+
+                    <!-- POIDS (Épaisseur) -->
+                    <MenuItem x:Name="MenuPoids" Header="_Poids" InputGestureText="Ctrl+E">
+                        <MenuItem Header="Très fin (0.1)" Tag="0.1" Click="MenuWeight_Click" IsCheckable="True"/>
+                        <MenuItem Header="Fin (0.2)" Tag="0.2" Click="MenuWeight_Click" IsCheckable="True"/>
+                        <MenuItem Header="Normal (0.5)" Tag="0.5" Click="MenuWeight_Click" IsCheckable="True" IsChecked="True"/>
+                        <MenuItem Header="Épais (1.0)" Tag="1.0" Click="MenuWeight_Click" IsCheckable="True"/>
+                        <MenuItem Header="Très épais (2.0)" Tag="2.0" Click="MenuWeight_Click" IsCheckable="True"/>
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Vue">

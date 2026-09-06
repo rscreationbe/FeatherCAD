@@ -13,11 +13,14 @@ namespace FeatherCAD.Logic
         // Configuration pour gérer le polymorphisme (Lignes, Cercles, Arcs dans la même liste)
         private static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
         {
-            TypeNameHandling = TypeNameHandling.All,
+            TypeNameHandling = TypeNameHandling.Auto,
             Formatting = Newtonsoft.Json.Formatting.Indented,
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            Converters = {
+        new ColorJsonConverter() // Utilisez le nouveau nom ici
+    }
         };
-
+        // Méthode pour sauvegarder un projet dans un fichier .fcad
         public static void Save(CadProject project)
         {
             SaveFileDialog dlg = new SaveFileDialog
@@ -39,7 +42,7 @@ namespace FeatherCAD.Logic
                 }
             }
         }
-
+        // Méthode pour ouvrir un projet depuis un fichier .fcad
         public static CadProject? Open()
         {
             OpenFileDialog dlg = new OpenFileDialog

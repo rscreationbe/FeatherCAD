@@ -24,7 +24,7 @@ namespace FeatherCAD.Tools
                 Canvas.StartDrawingAction(worldPos);
                 // On s'assure que c'est un cercle qu'on prévisualise
                 Canvas.PreviewLine = null;
-                Canvas.PreviewCircle = new CircleEntity(worldPos, 0, Colors.Gray, 0.5) { DashStyle = DashStyles.Dash };
+                Canvas.PreviewCircle = new CircleEntity(worldPos, 0, Colors.Gray, 0.5) { Pattern = Canvas.ActiveLayer.LinePattern };
             }
             else
             {

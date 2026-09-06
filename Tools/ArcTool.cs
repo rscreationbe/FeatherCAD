@@ -26,7 +26,7 @@ namespace FeatherCAD.Tools
                 _step = 1;
                 Canvas.StartDrawingAction(worldPos);
                 // Preview du rayon (ligne élastique)
-                Canvas.PreviewLine = new LineEntity(_center, worldPos, Colors.Gray, 0.5) { DashStyle = DashStyles.Dash };
+                Canvas.PreviewLine = new LineEntity(_center, worldPos, Colors.Gray, 0.5) { Pattern = Canvas.ActiveLayer.LinePattern };
             }
             else if (_step == 1)
             {
@@ -34,7 +34,7 @@ namespace FeatherCAD.Tools
                 _step = 2;
                 Canvas.PreviewLine = null;
                 // Preview de l'arc
-                Canvas.PreviewArc = new ArcEntity(_center, _startPoint, worldPos, Colors.Gray, 0.5) { DashStyle = DashStyles.Dash };
+                Canvas.PreviewArc = new ArcEntity(_center, _startPoint, worldPos, Colors.Gray, 0.5) { Pattern = Canvas.ActiveLayer.LinePattern };
             }
             else if (_step == 2)
             {
@@ -45,7 +45,8 @@ namespace FeatherCAD.Tools
 
                 var arc = new ArcEntity(_center, _startPoint, finalEnd, Canvas.ActiveLayer.Color, Canvas.ActiveLayer.Thickness)
                 {
-                    LayerName = Canvas.ActiveLayer.Name
+                    LayerName = Canvas.ActiveLayer.Name,
+                    Pattern = Canvas.ActiveLayer.LinePattern
                 };
                 Canvas.Entities.Add(arc);
                 Canvas.SetSingleSelection(arc);

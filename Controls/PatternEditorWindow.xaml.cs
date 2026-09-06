@@ -48,9 +48,11 @@ public partial class PatternEditorWindow : Window
 
     private List<double> ParseSequence(string input)
     {
+        if (string.IsNullOrWhiteSpace(input)) return new List<double>();
+
         return input.Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Select(s => double.TryParse(s.Trim(), out double d) ? d : 0)
-                    .Where(d => d > 0)
+                    .Select(s => double.TryParse(s.Trim(), out double d) ? d : -1.0)
+                    .Where(d => d > 0) // On ignore les valeurs négatives ou nulles
                     .ToList();
     }
 
@@ -64,7 +66,7 @@ public partial class PatternEditorWindow : Window
 
         var dashes = ParseSequence(TxtSequence.Text);
 
-        //CreatedPattern = new LinePattern(TxtName.Text, dashes);
+        CreatedPattern = new LinePattern(TxtName.Text, dashes);
         this.DialogResult = true;
     }
 }

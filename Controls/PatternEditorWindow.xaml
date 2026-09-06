@@ -29,7 +29,7 @@
         <!-- Aperçu -->
         <GroupBox Grid.Row="3" Header="Aperçu" Margin="0,10">
             <Canvas x:Name="PreviewArea" Background="White" Margin="5">
-                <Line x:Name="PreviewLine" X1="10" Y1="30" X2="380" Y2="30" 
+                <Line x:Name="PreviewLine" X1="10" Y1="0" X2="360" Y2="0" 
                       Stroke="Black" StrokeThickness="2"/>
             </Canvas>
         </GroupBox>
