@@ -27,7 +27,7 @@ namespace FeatherCAD
 
             _canvas.AddLayer(newLayer);
         }
-
+        // Méthode bouton supprimer un calque
         private void DeleteLayer_Click(object sender, RoutedEventArgs e)
         {
             if (LayersGrid.SelectedItem is Layer layer)
@@ -43,22 +43,22 @@ namespace FeatherCAD
                 }
             }
         }
-        // Méthode 
+        // Méthode pour activer un calque
         private void ActivateLayer_Click(object sender, RoutedEventArgs e)
         {
             if (sender is RadioButton rb && rb.DataContext is Layer selectedLayer)
             {
-                // 1. Mettre à jour le Canvas
+                // On définit le calque actif dans le canvas
+                // C'est ce "SET" qui va déclencher la boucle de synchronisation du point 1
                 _canvas.ActiveLayer = selectedLayer;
-
-                // 2. Assurer l'exclusivité dans la collection (Rigueur des données)
-                foreach (var layer in _canvas.Layers)
-                {
-                    layer.IsActiveLayer = (layer == selectedLayer);
-                }
             }
+            _canvas.InvalidateVisual();
         }
-
-        private void Close_Click(object sender, RoutedEventArgs e) => Close();
+        //        
+        private void Close_Click(object sender, RoutedEventArgs e) 
+        {
+            _canvas.InvalidateVisual();
+            Close(); 
+        }
     }
 }

@@ -31,14 +31,27 @@ namespace FeatherCAD.Models
         {
             Point p1 = worldToScreen(Start);
             Point p2 = worldToScreen(End);
-            
-            // Si sélectionné, on force le Bleu, sinon on prend la couleur de l'entité
-            Color drawColor = isSelected ? Colors.Red : this.Color;
+
+            Color drawColor = isSelected ? Colors.Red : Color;
 
             Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
-            if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
 
-            pen.Freeze();
+            // --- LE CŒUR DE LA CORRECTION D'ÉCHELLE ---
+            if (Pattern != null && Pattern.Dashes != null && Pattern.Dashes.Count > 0)
+            {
+                // RIGOUREUX : On divise chaque valeur du motif par l'épaisseur du trait.
+                // Cela annule le multiplicateur automatique de WPF.
+                var correctedDashes = Pattern.Dashes.Select(d => d*2 / Thickness).ToList(); 
+
+                // On crée un nouveau DashStyle à la volée pour ce rendu spécifique
+                pen.DashStyle = new DashStyle(correctedDashes, 0);
+            }
+            else
+            {
+                pen.DashStyle = DashStyles.Solid;
+            }
+
+            pen.Freeze(); // Toujours figer pour la performance
             dc.DrawLine(pen, p1, p2);
         }
     }

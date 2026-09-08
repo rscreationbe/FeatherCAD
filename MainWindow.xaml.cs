@@ -242,6 +242,8 @@ public partial class MainWindow : Window
     {
         TxtX1.Text = TxtY1.Text = TxtDX.Text = TxtDY.Text = TxtDist.Text = TxtAngle.Text = "";
     }
+
+
     // --- MENU FICHIER ---
 
     private void MenuNew_Click(object sender, RoutedEventArgs e)
@@ -268,7 +270,7 @@ public partial class MainWindow : Window
     }
 
     // --- MENU ÉDITION ---
-
+    // On simule l'appui sur la touche Delete
     private void MenuDelete_Click(object sender, RoutedEventArgs e)
     {
         // On simule l'appui sur la touche Delete
@@ -280,7 +282,7 @@ public partial class MainWindow : Window
             MyViewport.DeselectAll();
         }
     }
-
+    
     private void PopulatePatternMenu()
     {
         if (MenuMotif == null) return;
@@ -345,6 +347,7 @@ public partial class MainWindow : Window
         // MyViewport.ShowGrid = !MyViewport.ShowGrid;
         MyViewport.InvalidateVisual();
     }
+
     private void MenuColorPicker_Click(object sender, RoutedEventArgs e)
     {
         ColorPickerWindow picker = new ColorPickerWindow
@@ -542,9 +545,12 @@ public partial class MainWindow : Window
     }
     public void OpenLayer()
     {
-        LayersWindow win = new LayersWindow(MyViewport);
-        win.Owner = this;
+        LayersWindow win = new LayersWindow(MyViewport)
+        {
+            Owner = this
+        };
         win.Show(); // On utilise Show pour pouvoir dessiner tout en gardant la fenêtre ouverte
+        ComboLayers.SelectedItem = MyViewport.ActiveLayer;
     }
     public void UpdateLayerComboBox()
     {
@@ -554,10 +560,10 @@ public partial class MainWindow : Window
         ComboLayers.SelectedItem = MyViewport.ActiveLayer;
     }
 
-    private void MenuMotif_Click(object sender, RoutedEventArgs e)
-    {
+    //private void MenuMotif_Click(object sender, RoutedEventArgs e)
+    //{
 
-    }
+    //}
     private void MenuCustomPattern_Click(object sender, RoutedEventArgs e)
     {
         var editor = new PatternEditorWindow();

@@ -13,15 +13,15 @@ namespace FeatherCAD.Models
         private bool _isActiveLayer;
         private Color _color = Colors.Black;
         private double  _thickness = 0.5;
-        //private DashStyle _dashStyle = DashStyles.Solid;
         private LinePattern _linePattern = LinePatternManager.Patterns.First();
+
+        // Propriétés avec notification de changement
         public LinePattern LinePattern
         {
             get => _linePattern;
             set { _linePattern = value; OnPropertyChanged(); }
         }
-
-
+        
         public bool IsVisible
         {
             get => _isVisible;
@@ -51,12 +51,6 @@ namespace FeatherCAD.Models
             }
         }
 
-        //public DashStyle DashStyle
-        //{
-        //    get { return _dashStyle; }
-        //    set { _dashStyle = value; OnPropertyChanged(); }
-        //}
-
         public bool IsActiveLayer
         {
             get => _isActiveLayer;
@@ -69,6 +63,7 @@ namespace FeatherCAD.Models
                 }
             }
         }
+
         public string Name
         {
             get => _name;

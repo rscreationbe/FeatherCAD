@@ -62,10 +62,21 @@ public class CircleEntity : Entity
 
         // Logique de couleur identique
         Color drawColor = isSelected ? Colors.Red : this.Color;
-        //double thickness = isSelected ? this.Thickness + 1 : this.Thickness;
 
         Pen pen = new Pen(new SolidColorBrush(drawColor), Thickness);
-        if (Pattern != null) pen.DashStyle = Pattern.WpfDashStyle;
+        if (Pattern != null && Pattern.Dashes != null && Pattern.Dashes.Count > 0)
+        {
+            // RIGOUREUX : On divise chaque valeur du motif par l'épaisseur du trait.
+            // Cela annule le multiplicateur automatique de WPF.
+            var correctedDashes = Pattern.Dashes.Select(d => d * 2 / Thickness).ToList();
+
+            // On crée un nouveau DashStyle à la volée pour ce rendu spécifique
+            pen.DashStyle = new DashStyle(correctedDashes, 0);
+        }
+        else
+        {
+            pen.DashStyle = DashStyles.Solid;
+        }
         pen.Freeze();
 
         dc.DrawEllipse(null, pen, screenCenter, screenRadius, screenRadius);

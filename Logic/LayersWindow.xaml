@@ -17,9 +17,8 @@
                 <DataGridTemplateColumn Header="Actif" Width="50">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <!-- Liaison directe sur IsActiveLayer du calque -->
-                            <RadioButton IsChecked="{Binding IsActiveLayer, UpdateSourceTrigger=PropertyChanged}" 
-                         GroupName="ActiveLayerGroup" 
+                            <!-- Binding TwoWay impératif -->
+                            <RadioButton IsChecked="{Binding IsActiveLayer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                          HorizontalAlignment="Center" 
                          VerticalAlignment="Center"
                          Click="ActivateLayer_Click"/>

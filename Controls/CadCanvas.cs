@@ -42,7 +42,7 @@ public class CadCanvas : FrameworkElement
     private DraftingAssistant _assistant = new();
     private SnapResult _currentSnap = new() { Type = SnapType.None };
     private CadTool _activeTool;
-    private Layer? _activeLayer;
+    private Layer _activeLayer;
     private CadToolType _currentToolType = CadToolType.Select; // Le type (Enum)
 
     //public CadTool ActiveTool => _activeTool;
@@ -829,8 +829,16 @@ public class CadCanvas : FrameworkElement
     #region LAYERS
     public ObservableCollection<Layer> Layers { get; set; } = new()
     {
-        new Layer { Name = "Calque 1", Color = Colors.Black }
+        new Layer 
+        { 
+            Name = "Calque 1", 
+            Color = Colors.Black, 
+            IsActiveLayer = true , 
+            LinePattern = LinePatternManager.Patterns.First(),
+            Thickness = 0.5
+        }
     };
+
 
 
     public Layer ActiveLayer
@@ -842,14 +850,17 @@ public class CadCanvas : FrameworkElement
             {
                 _activeLayer = value;
 
-                // Rigueur : On synchronise le flag booléen pour les RadioButtons de l'UI
+                // RIGUEUR : On synchronise manuellement les booléens de TOUS les calques
+                // Cela force les RadioButtons de la LayersWindow à se cocher/décocher
                 foreach (var l in Layers)
                 {
                     l.IsActiveLayer = (l == _activeLayer);
                 }
 
-                // On notifie les abonnés (comme la MainWindow)
+                // On notifie la ComboBox de la MainWindow
                 OnPropertyChanged(nameof(ActiveLayer));
+
+                // On force le rafraîchissement si nécessaire
                 InvalidateVisual();
             }
         }
